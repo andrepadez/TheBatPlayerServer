@@ -4,8 +4,10 @@ var utils = require("./utils.js");
 var LastfmAPI = require('lastfmapi');
 var md5 = require('MD5');
 var imageColor = require("./imageColor.js");
-var Memcached = require('memcached');
+// var Memcached = require('memcached');
 var async = require("async");
+var moment = require("moment");
+
 var S = require('string');
 
 S.extendPrototype();
@@ -16,12 +18,12 @@ var lastfm = new LastfmAPI({
 
 var memcacheClient = null;
 
-function fetchMetadataForUrl(url, mainCallback) {
+function fetchMetadataForUrl(url, req, mainCallback) {
 
   var track = null;
   var streamCacheKey = ("cache-stream-" + url).slugify();
   var streamFetchMethodCacheKey = ("cache-stream-fetchmethod" + url).slugify();
-
+  memcacheClient = req.memcache;
 
   if (url.endsWith("/;")) {
     url = url + "/;";
@@ -30,16 +32,15 @@ function fetchMetadataForUrl(url, mainCallback) {
   async.series([
 
       // Initialize memcache
-      function(asyncCallback) {
-        setupMemcache(asyncCallback);
-      },
+      // function(asyncCallback) {
+      //   setupMemcache(asyncCallback);
+      // },
 
       // Check for a cached version
       function(asyncCallback) {
         memcacheClient.get(streamCacheKey, function(error, result) {
           if (!error && result) {
             track = result;
-            track.cached = true;
             mainCallback(track);
             return;
             // cleanup();
@@ -53,13 +54,9 @@ function fetchMetadataForUrl(url, mainCallback) {
       function(asyncCallback) {
         if (track === null) {
           shoutcasttitle.getV1Title(url, function(data) {
-            if (data !== null) {
-              track = utils.createTrackFromTitle(data.title);
-              track.station = data;
-              asyncCallback();
-            } else {
-              asyncCallback();
-            }
+            track = utils.createTrackFromTitle(data.title);
+            track.station = data;
+            asyncCallback();
           });
         } else {
           asyncCallback();
@@ -70,13 +67,9 @@ function fetchMetadataForUrl(url, mainCallback) {
       function(asyncCallback) {
         if (track === null) {
           shoutcasttitle.getV2Title(url, function(data) {
-            if (data !== null) {
-              track = utils.createTrackFromTitle(data.title);
-              track.station = data;
-              asyncCallback();
-            } else {
-              asyncCallback();
-            }
+            track = utils.createTrackFromTitle(data.title);
+            track.station = data;
+            asyncCallback();
           });
         } else {
           asyncCallback();
@@ -88,20 +81,13 @@ function fetchMetadataForUrl(url, mainCallback) {
       function(asyncCallback) {
         if (track === null) {
           streamtitle.getTitle(url, function(title) {
-            if (title !== null) {
-              track = utils.createTrackFromTitle(title);
-              asyncCallback();
-            } else {
-              // Fail completely
-            }
+            track = utils.createTrackFromTitle(title);
           });
-        } else {
-          asyncCallback();
         }
+        asyncCallback();
       },
 
       function(asyncCallback) {
-
         async.parallel([
 
             // Artist details
@@ -136,15 +122,12 @@ function fetchMetadataForUrl(url, mainCallback) {
       }
     ],
     function(err) {
-
-      // Return the data and cache the results.
-      if (track.cached !== true) {
-        expires = Math.round(new Date().getTime() / 1000) + 5;
-        track.expires = expires;
-        cacheData(streamCacheKey, track, 5);
-      }
+      expires = Math.round(new Date().getTime() / 1000) + 5;
+      track.expires = expires;
 
       mainCallback(track);
+      cacheData(streamCacheKey, track, 5);
+      //cleanup();
     });
 
 }
@@ -183,9 +166,8 @@ function getTrackDetails(artistName, trackName, callback) {
         track: trackName,
         autocorrect: 1
       }, function(err, trackDetails) {
-        if (trackDetails !== undefined) {
-          cacheData(trackCacheKey, trackDetails, 0);
-        }
+        console.log("Fetched track from api");
+        cacheData(trackCacheKey, trackDetails, 0);
         callback(err, trackDetails);
       });
     }
@@ -213,11 +195,14 @@ function getColorForImage(url, callback) {
 function populateTrackObjectWithArtist(track, apiData) {
 
   try {
+    var bioDate = moment(apiData.bio.published).format();
+
     track.artist = apiData.name.trim();
     track.image.url = apiData.image.last()["#text"];
-    track.isOnTour = parseInt(apiData.ontour);
+    track.isOnTour = apiData.ontour;
     track.bio.text = apiData.bio.summary.stripTags().trim();
-    track.bio.published = apiData.bio.published;
+    track.bio.published = bioDate.substr(0, bioDate.length - 6);
+
     track.tags = apiData.tags.tag.map(function(tagObject) {
       return tagObject.name;
     });
@@ -233,20 +218,18 @@ function populateTrackObjectWithTrack(track, apiData) {
 
   if (apiData !== null) {
     try {
+      var releaseDate = moment(apiData.album.releaseDate);
+      track.album.name = apiData.album.title;
       track.artist = apiData.artist.name;
-      if (apiData.album.name !== null) {
-        track.album.name = apiData.album.title;
-        track.album.image = apiData.album.image.last()["#text"];
-        track.album.releaseDate = apiData.album.releaseDate;
-      } else {
-        track.album = null;
-      }
+      track.album.image = apiData.album.image.last()["#text"];
+      track.album.releaseDate = releaseDate.substr(0, releaseDate.length - 6);
       track.metaDataFetched = true;
     } catch (e) {
 
     } finally {
       track.album = null;
     }
+
   }
 
 }
