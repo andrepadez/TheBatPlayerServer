@@ -39,6 +39,7 @@ function fetchMetadataForUrl(url, mainCallback) {
         memcacheClient.get(streamCacheKey, function(error, result) {
           if (!error && result) {
             track = result;
+            track.cached = true;
             mainCallback(track);
             return;
             // cleanup();
@@ -52,9 +53,13 @@ function fetchMetadataForUrl(url, mainCallback) {
       function(asyncCallback) {
         if (track === null) {
           shoutcasttitle.getV1Title(url, function(data) {
-            track = utils.createTrackFromTitle(data.title);
-            track.station = data;
-            asyncCallback();
+            if (data !== null) {
+              track = utils.createTrackFromTitle(data.title);
+              track.station = data;
+              asyncCallback();
+            } else {
+              asyncCallback();
+            }
           });
         } else {
           asyncCallback();
@@ -65,9 +70,13 @@ function fetchMetadataForUrl(url, mainCallback) {
       function(asyncCallback) {
         if (track === null) {
           shoutcasttitle.getV2Title(url, function(data) {
-            track = utils.createTrackFromTitle(data.title);
-            track.station = data;
-            asyncCallback();
+            if (data !== null) {
+              track = utils.createTrackFromTitle(data.title);
+              track.station = data;
+              asyncCallback();
+            } else {
+              asyncCallback();
+            }
           });
         } else {
           asyncCallback();
@@ -79,13 +88,20 @@ function fetchMetadataForUrl(url, mainCallback) {
       function(asyncCallback) {
         if (track === null) {
           streamtitle.getTitle(url, function(title) {
-            track = utils.createTrackFromTitle(title);
+            if (title !== null) {
+              track = utils.createTrackFromTitle(title);
+              asyncCallback();
+            } else {
+              // Fail completely
+            }
           });
+        } else {
+          asyncCallback();
         }
-        asyncCallback();
       },
 
       function(asyncCallback) {
+
         async.parallel([
 
             // Artist details
@@ -120,12 +136,15 @@ function fetchMetadataForUrl(url, mainCallback) {
       }
     ],
     function(err) {
-      expires = Math.round(new Date().getTime() / 1000) + 5;
-      track.expires = expires;
+
+      // Return the data and cache the results.
+      if (track.cached !== true) {
+        expires = Math.round(new Date().getTime() / 1000) + 5;
+        track.expires = expires;
+        cacheData(streamCacheKey, track, 5);
+      }
 
       mainCallback(track);
-      cacheData(streamCacheKey, track, 5);
-      //cleanup();
     });
 
 }
@@ -164,8 +183,9 @@ function getTrackDetails(artistName, trackName, callback) {
         track: trackName,
         autocorrect: 1
       }, function(err, trackDetails) {
-        console.log("Fetched track from api");
-        cacheData(trackCacheKey, trackDetails, 0);
+        if (trackDetails !== undefined) {
+          cacheData(trackCacheKey, trackDetails, 0);
+        }
         callback(err, trackDetails);
       });
     }
@@ -195,7 +215,7 @@ function populateTrackObjectWithArtist(track, apiData) {
   try {
     track.artist = apiData.name.trim();
     track.image.url = apiData.image.last()["#text"];
-    track.isOnTour = apiData.ontour;
+    track.isOnTour = parseInt(apiData.ontour);
     track.bio.text = apiData.bio.summary.stripTags().trim();
     track.bio.published = apiData.bio.published;
     track.tags = apiData.tags.tag.map(function(tagObject) {
@@ -213,13 +233,19 @@ function populateTrackObjectWithTrack(track, apiData) {
 
   if (apiData !== null) {
     try {
-      track.album.name = apiData.album.title;
       track.artist = apiData.artist.name;
-      track.album.image = apiData.album.image.last()["#text"];
-      track.album.releaseDate = apiData.album.releaseDate;
+      if (apiData.album.name !== null) {
+        track.album.name = apiData.album.title;
+        track.album.image = apiData.album.image.last()["#text"];
+        track.album.releaseDate = apiData.album.releaseDate;
+      } else {
+        track.album = null;
+      }
       track.metaDataFetched = true;
     } catch (e) {
 
+    } finally {
+      track.album = null;
     }
   }
 

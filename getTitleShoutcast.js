@@ -15,14 +15,19 @@ function getV1Title(url, callback) {
   };
   request(options, function(error, response, body) {
     var csv = body.stripTags();
-    var csvArray = csv.split(",");
+    var csvArray = csv.split(",", 7);
 
-    var station = {};
-    station.listeners = csvArray[0];
-    station.bitrate = csvArray[5];
-    station.title = csvArray[6];
-    station.fetchsource = "SHOUTCAST_V1";
-    callback(station);
+    if (csvArray.length > 1) {
+      var station = {};
+      station.listeners = csvArray[0];
+      station.bitrate = csvArray[5];
+      station.title = csvArray[6];
+      station.fetchsource = "SHOUTCAST_V1";
+
+      callback(station);
+    } else {
+      callback(null);
+    }
   });
 }
 
@@ -41,16 +46,26 @@ function getV2Title(url, callback) {
     }
   };
   request(options, function(error, response, body) {
+    if (body && response.statusCode === 200) {
+      // Parse XML body
+      try {
+        parseString(body, function(err, result) {
+          var station = {};
+          station.listeners = result.CURRENTLISTENERS;
+          station.bitrate = result.BITRATE;
+          station.title = result.SONGTITLE;
+          station.fetchsource = "SHOUTCAST_V2";
+          callback(station);
+        });
+      } catch (e) {
 
-    // Parse XML body
-    parseString(body, function(err, result) {
-      var station = {};
-      station.listeners = result.CURRENTLISTENERS;
-      station.bitrate = result.BITRATE;
-      station.title = result.SONGTITLE;
-      station.fetchsource = "SHOUTCAST_V2";
-      callback(station);
-    });
+      } finally {
+        callback(null);
+      }
+
+    } else {
+      callback(null);
+    }
   });
 
 }

@@ -37,9 +37,9 @@ function getColorForUrl(url, callback) {
 
     colorObject.hex = colorFormats.hex();
 
-    colorObject.hsv.hue = colorFormats.hsv().hue();
-    colorObject.hsv.sat = colorFormats.hsv().saturation();
-    colorObject.hsv.val = colorFormats.hsv().value();
+    colorObject.hsv.hue = colorFormats.hsl().hue();
+    colorObject.hsv.sat = colorFormats.hsl().saturation();
+    colorObject.hsv.val = colorFormats.hsl().lightness();
     colorObject.int = 65536 * colorObject.rgb.red + 256 * colorObject.rgb.green + colorObject.rgb.blue;
 
     callback(colorObject);
