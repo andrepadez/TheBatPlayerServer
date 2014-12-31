@@ -5,19 +5,20 @@ var logger = require('morgan');
 // var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var metadata = require("./getMetadata.js");
+// var metadata = require("./getMetadata.js");
 var Memcached = require('memcached');
 
 var routes = require('./routes/index');
 // var users = require('./routes/users');
+var metadata = require("./routes/metadata.js");
 
 var app = express();
-
 var memcacheClient = null;
+setupMemcache();
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'jade');
+app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -29,27 +30,12 @@ app.use(bodyParser.urlencoded({
 // app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-// app.use('/users', users);
-
-setupMemcache();
-
-app.get('/metadata/:streamurl', function(req, res) {
-  app.disable('etag');
-  req.memcache = memcacheClient;
-  //res.setHeader('Content-Type', 'application/json');
-
-  var stream = req.params.streamurl;
-  metadata.fetchMetadataForUrl(stream, req, function(result) {
-    res.json(result);
-  });
-
-});
+app.use("/metadata", metadata);
 
 function setupMemcache() {
   if (memcacheClient === null) {
-    memcacheClient = new Memcached();
-    memcacheClient.connect("127.0.0.1:11211", function() {});
+    app.memcacheClient = new Memcached();
+    app.memcacheClient.connect("127.0.0.1:11211", function() {});
   }
 }
 
