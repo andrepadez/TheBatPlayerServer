@@ -4,8 +4,10 @@ var utils = require("./utils.js");
 var LastfmAPI = require('lastfmapi');
 var md5 = require('MD5');
 var imageColor = require("./imageColor.js");
-var Memcached = require('memcached');
+// var Memcached = require('memcached');
 var async = require("async");
+var moment = require("moment");
+
 var S = require('string');
 
 S.extendPrototype();
@@ -16,12 +18,12 @@ var lastfm = new LastfmAPI({
 
 var memcacheClient = null;
 
-function fetchMetadataForUrl(url, mainCallback) {
+function fetchMetadataForUrl(url, req, mainCallback) {
 
   var track = null;
   var streamCacheKey = ("cache-stream-" + url).slugify();
   var streamFetchMethodCacheKey = ("cache-stream-fetchmethod" + url).slugify();
-
+  memcacheClient = req.memcache;
 
   if (url.endsWith("/;")) {
     url = url + "/;";
@@ -30,9 +32,9 @@ function fetchMetadataForUrl(url, mainCallback) {
   async.series([
 
       // Initialize memcache
-      function(asyncCallback) {
-        setupMemcache(asyncCallback);
-      },
+      // function(asyncCallback) {
+      //   setupMemcache(asyncCallback);
+      // },
 
       // Check for a cached version
       function(asyncCallback) {
@@ -193,11 +195,14 @@ function getColorForImage(url, callback) {
 function populateTrackObjectWithArtist(track, apiData) {
 
   try {
+    var bioDate = moment(apiData.bio.published).format();
+
     track.artist = apiData.name.trim();
     track.image.url = apiData.image.last()["#text"];
     track.isOnTour = apiData.ontour;
     track.bio.text = apiData.bio.summary.stripTags().trim();
-    track.bio.published = apiData.bio.published;
+    track.bio.published = bioDate.substr(0, bioDate.length - 6);
+
     track.tags = apiData.tags.tag.map(function(tagObject) {
       return tagObject.name;
     });
@@ -213,14 +218,18 @@ function populateTrackObjectWithTrack(track, apiData) {
 
   if (apiData !== null) {
     try {
+      var releaseDate = moment(apiData.album.releaseDate);
       track.album.name = apiData.album.title;
       track.artist = apiData.artist.name;
       track.album.image = apiData.album.image.last()["#text"];
-      track.album.releaseDate = apiData.album.releaseDate;
+      track.album.releaseDate = releaseDate.substr(0, releaseDate.length - 6);
       track.metaDataFetched = true;
     } catch (e) {
 
+    } finally {
+      track.album = null;
     }
+
   }
 
 }
