@@ -1,3 +1,7 @@
+if (app.get('env') === "production") {
+  require('newrelic');
+}
+
 var express = require('express');
 // var path = require('path');
 // var favicon = require('serve-favicon');
@@ -46,11 +50,6 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
-
-
-if (app.get('env') === "production") {
-  require('newrelic');
-};
 
 // error handlers
 
