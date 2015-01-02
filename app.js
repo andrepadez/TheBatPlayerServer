@@ -1,9 +1,9 @@
 var express = require('express');
 var app = express();
 
-if (app.get('env') === "production") {
+//if (app.get('env') === "production") {
   require('newrelic');
-}
+//}
 
 var logger = require('morgan');
 var bodyParser = require('body-parser');

@@ -53,15 +53,23 @@ function getTrackDetails(artistName, trackName, callback) {
       console.log("Fetched track from cache");
       callback(error, result);
     } else {
-      lastfm.track.getInfo({
-        artist: artistName,
-        track: trackName,
-        autocorrect: 1
-      }, function(err, trackDetails) {
-        console.log("Fetched track from api");
-        utils.cacheData(cacheKey, trackDetails, 0);
-        callback(err, trackDetails);
-      });
+      try {
+        lastfm.track.getInfo({
+          artist: artistName,
+          track: trackName,
+          autocorrect: 1
+        }, function(err, trackDetails) {
+          console.log("Fetched track from api");
+          utils.cacheData(cacheKey, trackDetails, 0);
+          callback(err, trackDetails);
+        });
+      } catch (e) {
+
+
+      } finally {
+        callback(null, null);
+      }
+
     }
   });
 }

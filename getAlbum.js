@@ -12,14 +12,6 @@ var track = "Floodwater";
 
 var hasRefetchedSanitizedTrack;
 
-// memcacheClient.connect("127.0.0.1:11211", function() {
-//   fetchAlbumForArtistAndTrack(artist, track, function(error, result) {
-//     console.log(result);
-//   });
-//
-// });
-
-
 function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
   var albumObjectCacheKey = ("artist-" + artist + "track-" + track).slugify();
 
@@ -47,6 +39,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
             if (lastFmResult) {
               var albumObject = createAlbumObjectFromLastFMResult(lastFmResult);
               mainCallback(error, albumObject);
+              utils.cacheData(albumObjectCacheKey, albumObject, 0);
             } else {
               console.log("All failed.  Fallback to LastFM.");
 

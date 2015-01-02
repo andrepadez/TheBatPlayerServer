@@ -91,14 +91,14 @@ function fetchMetadataForUrl(url, req, mainCallback) {
             },
 
             // Track Details
-            function(parallelAsyncCallback2) {
+            function(callback) {
               if (track.song && track.artist) {
                 lastfm.getTrackDetails(utils.sanitize(track.artist), utils.sanitize(track.song), function(error, trackDetails) {
                   populateTrackObjectWithTrack(track, trackDetails);
-                  parallelAsyncCallback2();
+                  callback();
                 });
               } else {
-                parallelAsyncCallback2();
+                callback();
               }
 
             },
@@ -157,29 +157,30 @@ function populateTrackObjectWithAlbum(track, albumData) {
 
 function populateTrackObjectWithArtist(track, apiData) {
 
-  try {
-    var bioDate = moment(new Date(apiData.bio.published)).format();
+  if (apiData) {
+    try {
+      var bioDate = moment(new Date(apiData.bio.published)).format();
 
-    track.artist = apiData.name.trim();
-    track.image.url = apiData.image.last()["#text"];
-    track.isOnTour = apiData.ontour;
-    track.bio.text = apiData.bio.summary.stripTags().trim();
-    track.bio.published = bioDate.substr(0, bioDate.length - 6);
+      track.artist = apiData.name.trim();
+      track.image.url = apiData.image.last()["#text"];
+      track.isOnTour = parseInt(apiData.ontour);
+      track.bio.text = apiData.bio.summary.stripTags().trim();
+      track.bio.published = bioDate.substr(0, bioDate.length - 6);
 
-    track.tags = apiData.tags.tag.map(function(tagObject) {
-      return tagObject.name;
-    });
+      track.tags = apiData.tags.tag.map(function(tagObject) {
+        return tagObject.name;
+      });
 
-    track.metaDataFetched = true;
-  } catch (e) {
+      track.metaDataFetched = true;
+    } catch (e) {
 
+    }
   }
-
 }
 
 function populateTrackObjectWithTrack(track, apiData) {
 
-  if (apiData !== null) {
+  if (apiData) {
     try {
       track.album.name = apiData.album.title;
       track.artist = apiData.artist.name;
