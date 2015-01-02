@@ -1,22 +1,15 @@
+var express = require('express');
+var app = express();
+
 if (app.get('env') === "production") {
   require('newrelic');
 }
 
-var express = require('express');
-// var path = require('path');
-// var favicon = require('serve-favicon');
 var logger = require('morgan');
-// var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-// var metadata = require("./getMetadata.js");
 var Memcached = require('memcached');
-
 var routes = require('./routes/index');
-// var users = require('./routes/users');
 var metadata = require("./routes/metadata.js");
-
-var app = express();
 
 var memcacheClient = null;
 setupMemcache();
