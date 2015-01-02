@@ -23,6 +23,9 @@
     "mc": "^1.0.6",
     "memcached": "^2.0.0",
     "xml2js": "^0.4.4",
-    "moment": "^2.8.4"
+    "moment": "^2.8.4",
+    "musicbrainz": "^0.2.4",
+    "nodebrainz": "^1.0.1",
+    "newrelic": "^1.14.5"
   }
 }

@@ -13,6 +13,7 @@ var routes = require('./routes/index');
 var metadata = require("./routes/metadata.js");
 
 var app = express();
+
 var memcacheClient = null;
 setupMemcache();
 
@@ -45,6 +46,11 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+
+if (app.get('env') === "production") {
+  require('newrelic');
+};
 
 // error handlers
 

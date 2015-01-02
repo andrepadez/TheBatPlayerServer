@@ -15,13 +15,24 @@ function getV1Title(url, callback) {
   };
   request(options, function(error, response, body) {
     var csv = body.stripTags();
-    var csvArray = csv.split(",", 7);
+    var csvArray = csv.split(",");
+
+    var title = "";
+    if (csvArray.length > 7) {
+      if (csvArray[7] === " The") {
+        title = csvArray[5] + " " + csvArray[6];
+      } else {
+        title = csvArray[6];
+      }
+    } else {
+      title = csvArray[6];
+    }
 
     if (csvArray.length > 1) {
       var station = {};
       station.listeners = csvArray[0];
       station.bitrate = csvArray[5];
-      station.title = csvArray[6];
+      station.title = title;
       station.fetchsource = "SHOUTCAST_V1";
 
       callback(station);
