@@ -27,7 +27,7 @@ function getAlbumDetails(artistName, albumName, callback) {
 
   global.memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined) {
-      console.log("Fetched track from cache");
+      // console.log("Fetched album from cache");
       callback(error, result);
     } else {
       lastfm.album.getInfo({
@@ -44,32 +44,30 @@ function getAlbumDetails(artistName, albumName, callback) {
 }
 
 function getTrackDetails(artistName, trackName, callback) {
-  // console.log("*** getTrackDetails");
-
   var cacheKey = ("cache-track-" + trackName + "-" + artistName).slugify();
 
   global.memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined) {
-      console.log("Fetched track from cache");
+      // console.log("Fetched track from cache");
       callback(error, result);
     } else {
+      var track;
       try {
         lastfm.track.getInfo({
           artist: artistName,
           track: trackName,
           autocorrect: 1
         }, function(err, trackDetails) {
+          track = trackDetails;
           console.log("Fetched track from api");
           utils.cacheData(cacheKey, trackDetails, 0);
-          callback(err, trackDetails);
         });
       } catch (e) {
-
-
-      } finally {
-        callback(null, null);
+        console.log("*** Exception in getTrackDetails:");
+        console.log(e);
       }
 
+      callback(null, track);
     }
   });
 }
@@ -85,7 +83,9 @@ function getArtistDetails(artistName, callback) {
         artist: artistName,
         autocorrect: 1
       }, function(err, artistDetails) {
+        console.log("Caching in getArtistDetails");
         utils.cacheData(artistCacheKey, artistDetails, 0);
+
         callback(err, artistDetails);
       });
     }

@@ -159,18 +159,18 @@ function populateTrackObjectWithArtist(track, apiData) {
 
   if (apiData) {
     try {
-      var bioDate = moment(new Date(apiData.bio.published)).format();
+      var bioDate = moment(new Date(apiData.bio.published));
 
       track.artist = apiData.name.trim();
       track.image.url = apiData.image.last()["#text"];
       track.isOnTour = parseInt(apiData.ontour);
       track.bio.text = apiData.bio.summary.stripTags().trim();
-      track.bio.published = bioDate.substr(0, bioDate.length - 6);
+      track.bio.published = bioDate.year();
 
       track.tags = apiData.tags.tag.map(function(tagObject) {
         return tagObject.name;
       });
-
+      //
       track.metaDataFetched = true;
     } catch (e) {
 

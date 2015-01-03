@@ -1,10 +1,8 @@
+require('newrelic');
+
 var express = require('express');
 var app = express();
-
-//if (app.get('env') === "production") {
-  require('newrelic');
-//}
-
+var timeout = require('connect-timeout');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var Memcached = require('memcached');
@@ -14,9 +12,11 @@ var metadata = require("./routes/metadata.js");
 var memcacheClient = null;
 setupMemcache();
 
+
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.use(timeout('15s'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));

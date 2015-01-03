@@ -76,18 +76,22 @@ function cacheData(key, value, lifetime) {
 }
 
 function getColorForImage(url, callback) {
-  var colorCacheKey = ("cache-color-" + md5(url)).slugify();
+  if (url) {
+    var colorCacheKey = ("cache-color-" + md5(url)).slugify();
 
-  global.memcacheClient.get(colorCacheKey, function(error, result) {
-    if (!error && result !== undefined) {
-      callback(result);
-    } else {
-      imageColor.getColorForUrl(url, function(color) {
-        callback(color);
-        cacheData(colorCacheKey, color, 0);
-      });
-    }
-  });
+    global.memcacheClient.get(colorCacheKey, function(error, result) {
+      if (!error && result !== undefined) {
+        callback(result);
+      } else {
+        imageColor.getColorForUrl(url, function(color) {
+          callback(color);
+          cacheData(colorCacheKey, color, 0);
+        });
+      }
+    });
+  } else {
+    callback(null);
+  }
 }
 module.exports.getColorForImage = getColorForImage;
 module.exports.createTrackFromTitle = createTrackFromTitle;

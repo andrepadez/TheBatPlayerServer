@@ -7,20 +7,15 @@ var lastfm = require("./utils/lastfm.js");
 var S = require('string');
 S.extendPrototype();
 
-var artist = "Nitzer Ebb";
-var track = "Floodwater";
-
 var hasRefetchedSanitizedTrack;
 
 function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
-  var albumObjectCacheKey = ("artist-" + artist + "track-" + track).slugify();
+  var albumObjectCacheKey = ("cache-artist-" + artist + "track-" + track).slugify();
 
   memcacheClient.get(albumObjectCacheKey, function(error, result) {
     if (!error && result !== undefined) {
-      console.log("Fetched from cache");
-      mainCallback(result);
+      mainCallback(null, result);
       return;
-
     } else {
 
       getAlbumsFromMusicbrainz(artist, track, function(jsonObject) {
@@ -31,23 +26,23 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
           albums = filterAlbums(albums);
           var album = albums.last();
 
-          var encodedAlbumName = encodeURIComponent(album.title);
-
           // Fetch the album art from LastFM
           lastfm.getAlbumDetails(artist, album.title, function(error, lastFmResult) {
 
             if (lastFmResult) {
-              var albumObject = createAlbumObjectFromLastFMResult(lastFmResult);
-              mainCallback(error, albumObject);
+              var albumObject = createAlbumObjectFromResults(lastFmResult, album);
               utils.cacheData(albumObjectCacheKey, albumObject, 0);
+              mainCallback(error, albumObject);
             } else {
               console.log("All failed.  Fallback to LastFM.");
 
               // Return whatever we get from Last.FM instead.
               lastfm.getAlbumDetails(artist, album.title, function(error, albumResult) {
-                var albumObject = createAlbumObjectFromLastFMResult(albumResult);
-                mainCallback(error, albumObject);
+                var albumObject = createAlbumObjectFromResults(albumResult, album);
+
+                console.log("Caching in fetchAlbumForArtistAndTrack");
                 utils.cacheData(albumObjectCacheKey, albumObject, 0);
+                mainCallback(error, albumObject);
               });
             }
           });
@@ -65,9 +60,9 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
             console.log("Using Last.FM");
             // Return whatever we get from Last.FM instead.
             lastfm.usingLastFM(artist, track, function(error, albumResult) {
-              var albumObject = createAlbumObjectFromLastFMResult(albumResult);
-              mainCallback(error, albumObject);
+              var albumObject = createAlbumObjectFromResults(albumResult, null);
               utils.cacheData(albumObjectCacheKey, albumObject, 0);
+              mainCallback(error, albumObject);
             });
           }
         }
@@ -86,16 +81,23 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
   return albumObject;
 }
 
-function createAlbumObjectFromLastFMResult(albumResultObject) {
-  if (albumResultObject) {
-    var albumTitle = albumResultObject.name;
-    var image = albumResultObject.image.last()["#text"];
-    var releaseDate = moment(new Date(albumResultObject.releasedate.trim())).year();
-    var albumObject = createAlbumObject(albumTitle, image, releaseDate, albumResultObject.mbid);
-    return albumObject;
-  } else {
-    return null;
+function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObject) {
+  var albumObject = null;
+
+  if (lastFmAlbumResultObject) {
+    var albumTitle = lastFmAlbumResultObject.name;
+    var image = lastFmAlbumResultObject.image.last()["#text"];
+    var releaseDate;
+    if (mbAlbumResultObject && mbAlbumResultObject.date) {
+      releaseDate = moment(new Date(mbAlbumResultObject.date.trim())).year();
+    } else if (lastFmAlbumResultObject.releasedate) {
+      releaseDate = moment(new Date(lastFmAlbumResultObject.releasedate.trim())).year();
+    }
+
+    albumObject = createAlbumObject(albumTitle, image, releaseDate, lastFmAlbumResultObject.mbid);
   }
+
+  return albumObject;
 
 }
 

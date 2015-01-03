@@ -20,7 +20,8 @@ function getV1Title(url, callback) {
     var title = "";
     if (csvArray.length > 7) {
       if (csvArray[7] === " The") {
-        title = csvArray[5] + " " + csvArray[6];
+        var csvArray2 = csv.split(" - ");
+        title = "The " + csvArray[6] + " - " + csvArray2.last();
       } else {
         title = csvArray[6];
       }
@@ -79,6 +80,12 @@ function getV2Title(url, callback) {
     }
   });
 
+}
+
+if (!Array.prototype.last) {
+  Array.prototype.last = function() {
+    return this[this.length - 1];
+  };
 }
 
 module.exports.getV1Title = getV1Title;
