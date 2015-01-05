@@ -13,6 +13,9 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
   var track = null;
   var streamCacheKey = ("cache-stream-" + url).slugify();
+
+  var sourceStreamCacheKey = ("cache-source-stream-" + url).slugify();
+  var metadataSource;
   var streamFetchMethodCacheKey = ("cache-stream-fetchmethod" + url).slugify();
   global.memcacheClient = req.app.memcacheClient;
 
@@ -20,121 +23,156 @@ function fetchMetadataForUrl(url, req, mainCallback) {
     url = url + "/;";
   }
 
-  async.series([
+  global.memcacheClient.get(streamFetchMethodCacheKey, function(error, result) {
+    metadataSource = result;
+    // console.log("Cached metadata source: " + result);
 
-      // Check for a cached version
-      function(asyncCallback) {
-        global.memcacheClient.get(streamCacheKey, function(error, result) {
-          if (!error && result) {
-            track = result;
-            mainCallback(track);
-            return;
-            // cleanup();
+    async.series([
+
+        // Check for a cached version
+        function(asyncCallback) {
+          global.memcacheClient.get(streamCacheKey, function(error, result) {
+            if (!error && result) {
+              track = result;
+              mainCallback(track);
+              return;
+              // cleanup();
+            } else {
+              asyncCallback();
+            }
+          });
+        },
+
+        // Get the title from Shoutcast v1 metadata
+        function(asyncCallback) {
+          if (track === null && (metadataSource != "SHOUTCAST_V2" && metadataSource != "STREAM")) {
+            shoutcasttitle.getV1Title(url, function(data) {
+              if (data) {
+                track = utils.createTrackFromTitle(data.title);
+                track.station = data;
+                if (!metadataSource) {
+                  utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V1", 0);
+                }
+              }
+              asyncCallback();
+            });
           } else {
             asyncCallback();
           }
-        });
-      },
+        },
 
-      // Get the title from Shoutcast v1 metadata
-      function(asyncCallback) {
-        if (track === null) {
-          shoutcasttitle.getV1Title(url, function(data) {
-            track = utils.createTrackFromTitle(data.title);
-            track.station = data;
+        // Get the title from Shoutcast v2 metadata
+        function(asyncCallback) {
+          if (track === null && (metadataSource != "SHOUTCAST_V1" && metadataSource != "STREAM")) {
+            shoutcasttitle.getV2Title(url, function(data) {
+              if (data) {
+                track = utils.createTrackFromTitle(data.title);
+                track.station = data;
+                if (!metadataSource) {
+                  utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V2", 0);
+                }
+
+              }
+              asyncCallback();
+            });
+          } else {
             asyncCallback();
-          });
-        } else {
-          asyncCallback();
-        }
-      },
+          }
 
-      // Get the title from Shoutcast v2 metadata
-      function(asyncCallback) {
-        if (track === null) {
-          shoutcasttitle.getV2Title(url, function(data) {
-            track = utils.createTrackFromTitle(data.title);
-            track.station = data;
+        },
+
+        // Get the title from the station stream
+        function(asyncCallback) {
+          if (track === null && (metadataSource != "SHOUTCAST_V2" && "SHOUTCAST_V1")) {
+            streamtitle.getTitle(url, function(title) {
+              if (title) {
+                track = utils.createTrackFromTitle(title);
+                if (!metadataSource) {
+                  utils.cacheData(streamFetchMethodCacheKey, "STREAM", 0);
+                }
+
+              }
+              asyncCallback();
+            });
+          } else {
             asyncCallback();
-          });
-        } else {
-          asyncCallback();
-        }
+          }
+        },
 
-      },
+        function(asyncCallback) {
+          if (track) {
+            async.parallel([
 
-      // Get the title from the station stream
-      function(asyncCallback) {
-        if (track === null) {
-          streamtitle.getTitle(url, function(title) {
-            track = utils.createTrackFromTitle(title);
-          });
-        }
-        asyncCallback();
-      },
+                // Artist details
+                function(callback) {
+                  lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
+                    populateTrackObjectWithArtist(track, artistDetails);
+                    utils.getColorForImage(track.image.url, function(color) {
+                      if (color) {
+                        track.image.color = color;
+                      }
+                      callback();
+                    });
+                  });
 
-      function(asyncCallback) {
-        async.parallel([
+                },
 
-            // Artist details
-            function(callback) {
-              lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
-                populateTrackObjectWithArtist(track, artistDetails);
-                utils.getColorForImage(track.image.url, function(color) {
-                  if (color) {
-                    track.image.color = color;
+                // Track Details
+                function(callback) {
+                  if (track.song && track.artist) {
+                    lastfm.getTrackDetails(utils.sanitize(track.artist), utils.sanitize(track.song), function(error, trackDetails) {
+                      populateTrackObjectWithTrack(track, trackDetails);
+                      callback();
+                    });
+                  } else {
+                    callback();
                   }
-                  callback();
-                });
+
+                },
+
+                // Album details
+                function(callback) {
+                  if (track.artist && track.song) {
+                    album.fetchAlbumForArtistAndTrack(track.artist, track.song, function(error, albumDetails) {
+                      populateTrackObjectWithAlbum(track, albumDetails);
+                      callback();
+                    });
+                  } else {
+                    track.album = null;
+                    callback();
+                  }
+                }
+
+
+              ],
+              function(err) {
+                asyncCallback();
               });
-
-            },
-
-            // Track Details
-            function(callback) {
-              if (track.song && track.artist) {
-                lastfm.getTrackDetails(utils.sanitize(track.artist), utils.sanitize(track.song), function(error, trackDetails) {
-                  populateTrackObjectWithTrack(track, trackDetails);
-                  callback();
-                });
-              } else {
-                callback();
-              }
-
-            },
-
-            // Album details
-            function(callback) {
-              if (track.artist && track.song) {
-                album.fetchAlbumForArtistAndTrack(track.artist, track.song, function(error, albumDetails) {
-                  populateTrackObjectWithAlbum(track, albumDetails);
-                  callback();
-                });
-              } else {
-                track.album = null;
-                callback();
-              }
-            }
-
-
-          ],
-          function(err) {
+          } else {
             asyncCallback();
-          });
 
-      }
-    ],
-    function(err) {
-      expires = Math.round(new Date().getTime() / 1000) + 5;
-      track.expires = expires;
+          }
+        }
+      ],
+      function(err) {
+        if (!track) {
+          track = createEmptyTrack();
+        }
+        expires = Math.round(new Date().getTime() / 1000) + 5;
+        track.expires = expires;
 
-      mainCallback(track);
-      utils.cacheData(streamCacheKey, track, 5);
-      //cleanup();
-    });
+        mainCallback(track);
+        utils.cacheData(streamCacheKey, track, 5);
+        //cleanup();
+      });
+  });
 
 }
 
+function createEmptyTrack() {
+  var track = {};
+  return track;
+}
 
 function populateTrackObjectWithAlbum(track, albumData) {
   // try {
@@ -160,11 +198,12 @@ function populateTrackObjectWithArtist(track, apiData) {
   if (apiData) {
     try {
       var bioDate = moment(new Date(apiData.bio.published));
+      var bioText = apiData.bio.summary.stripTags().trim().replace(/\n|\r/g, "");
 
       track.artist = apiData.name.trim();
       track.image.url = apiData.image.last()["#text"];
       track.isOnTour = parseInt(apiData.ontour);
-      track.bio.text = apiData.bio.summary.stripTags().trim();
+      track.bio.text = bioText;
       track.bio.published = bioDate.year();
 
       track.tags = apiData.tags.tag.map(function(tagObject) {

@@ -29,6 +29,8 @@
     "nodebrainz": "^1.0.1",
     "newrelic": "^1.14.5",
     "forever": "~0.14.0",
-    "connect-timeout": "~1.5.0"
+    "connect-timeout": "~1.5.0",
+    "dominant-color": "0.0.1",
+    "colour-extractor": "~0.2.1"
   }
 }

@@ -1,35 +1,30 @@
 var request = require('request');
 var urlparse = require('url');
+var utils = require("./utils/utils.js");
 var S = require('string');
 S.extendPrototype();
 
 function getV1Title(url, callback) {
   url = url + "/7.html";
+  var maxSize = 1000;
+  var size = 0;
+
   console.log("Fetching " + url);
 
   var options = {
     url: url,
+    timeout: 2000,
     headers: {
       'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
     }
   };
-  request(options, function(error, response, body) {
+  var res = request(options, function(error, response, body) {
     var csv = body.stripTags();
     var csvArray = csv.split(",");
+    var title = csv.split(",").slice(6).join(",");
+    title = utils.fixTrackTitle(title);
 
-    var title = "";
-    if (csvArray.length > 7) {
-      if (csvArray[7] === " The") {
-        var csvArray2 = csv.split(" - ");
-        title = "The " + csvArray[6] + " - " + csvArray2.last();
-      } else {
-        title = csvArray[6];
-      }
-    } else {
-      title = csvArray[6];
-    }
-
-    if (csvArray.length > 1) {
+    if (title) {
       var station = {};
       station.listeners = csvArray[0];
       station.bitrate = csvArray[5];
@@ -41,14 +36,29 @@ function getV1Title(url, callback) {
       callback(null);
     }
   });
+
+  res.on('data', function(data) {
+    size += data.length;
+    if (size > maxSize) {
+      res.abort();
+      callback(null);
+    }
+  });
 }
 
 function getV2Title(url, callback) {
   var parseString = require('xml2js').parseString;
 
   url = urlparse.parse(url);
+  var port = 80;
+  if (url.port) {
+    port = url.port;
+  }
 
-  var statsUrl = "http://" + url.hostname + ":" + url.port + "/stats?sid=1";
+  var maxSize = 1000;
+  var size = 0;
+
+  var statsUrl = "http://" + url.hostname + ":" + port + "/stats?sid=1";
   console.log("Fetching " + statsUrl);
 
   var options = {
@@ -57,7 +67,7 @@ function getV2Title(url, callback) {
       'User-Agent': 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13'
     }
   };
-  request(options, function(error, response, body) {
+  var res = request(options, function(error, response, body) {
     if (body && response.statusCode === 200) {
       // Parse XML body
       try {
@@ -76,6 +86,14 @@ function getV2Title(url, callback) {
       }
 
     } else {
+      callback(null);
+    }
+  });
+
+  res.on('data', function(data) {
+    size += data.length;
+    if (size > maxSize) {
+      res.abort();
       callback(null);
     }
   });

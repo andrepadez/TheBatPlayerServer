@@ -10,9 +10,18 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
   url = urlparse.parse(url);
   var client = new net.Socket();
 
-  client.connect(url.port, url.hostname, function() {
-    console.log("Connected to " + url.hostname);
+  var port;
+  if (!url.port) {
+    port = 80;
+  } else {
+    port = url.port;
+  }
+  // console.log("Connecting to " + url.hostname + " Port " + port);
+
+  client.connect(port, url.hostname, function() {
+    // console.log("Connected to " + url.hostname);
     var str = "GET " + url.path + " HTTP/1.1\r\n\Icy-Metadata: 1\r\nUser-Agent: Winamp 2.8\r\nhost: " + url.hostname + "\r\n\r\n";
+    // console.log(str);
     client.write(str);
   });
 
@@ -31,7 +40,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
       var endPosition = str.toString().indexOf(";", position);
       var titleString = str.substring(position, endPosition);
       title = titleString.substring(13, titleString.length - 1);
-      console.log("From stream: " + title);
+      // console.log("From stream: " + title);
       parentCallback(title);
 
     }

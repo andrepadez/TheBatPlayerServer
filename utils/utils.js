@@ -37,6 +37,22 @@ function createTrackFromTitle(title) {
   return track;
 }
 
+function fixTrackTitle(trackString) {
+  if (trackString.split(",").length > 1) {
+    var titleArtist = trackString.split(",")[0];
+    var titleSong = trackString.split(",")[1];
+
+    // Fix the "The" issue
+    if (titleSong.indexOf("The - ") !== -1) {
+      titleSong = trackString.split(",")[1].split(" - ")[1];
+      titleArtist = "The " + titleArtist;
+    }
+
+    return titleArtist + " - " + titleSong;
+  }
+
+}
+
 var download = function(uri, filename, callback) {
   if (uri) {
     console.log("Downloading " + uri);
@@ -98,3 +114,4 @@ module.exports.createTrackFromTitle = createTrackFromTitle;
 module.exports.download = download;
 module.exports.sanitize = sanitize;
 module.exports.cacheData = cacheData;
+module.exports.fixTrackTitle = fixTrackTitle;

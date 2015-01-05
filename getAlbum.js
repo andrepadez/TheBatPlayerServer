@@ -57,7 +57,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
             hasRefetchedSanitizedTrack = true;
             fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, mainCallback);
           } else {
-            console.log("Using Last.FM");
+            console.log("Giving up on MB and using Last.FM.");
             // Return whatever we get from Last.FM instead.
             lastfm.usingLastFM(artist, track, function(error, albumResult) {
               var albumObject = createAlbumObjectFromResults(albumResult, null);
@@ -135,6 +135,11 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
 function filterAlbums(albumsArray) {
 
+  // If there's only one then don't go through the below work.
+  if (albumsArray.length === 1) {
+    return albumsArray;
+  }
+
   albumsArray.sort(function(a, b) {
 
     // Turn your strings into dates, and then subtract them
@@ -142,9 +147,18 @@ function filterAlbums(albumsArray) {
     var aDate = Date(a.date);
     var bDate = Date(b.date);
 
-    if (bDate === null) {
-      console.log("No date for " + a.title);
+    // If there's no date then demote its sort order
+    if (!a.date) {
       return -1;
+    }
+
+    // If it has a secondary album type then demote it
+    try {
+      if (a["release-group"]["secondary-types"]) {
+        return -1;
+      }
+    } catch (e) {
+
     }
 
     return aDate - bDate;
@@ -155,8 +169,8 @@ function filterAlbums(albumsArray) {
   i = albumsArray.length;
   while (i--) {
     var singleAlbum = albumsArray[i];
-
-    if (singleAlbum.status == "Official" && singleAlbum["release-group"]["primary-type"] == "Album") {
+    console.log(singleAlbum);
+    if (singleAlbum.status === "Official" && singleAlbum["release-group"]["primary-type"] === "Album") {
       updatedAlbums.push(singleAlbum);
     }
   }
