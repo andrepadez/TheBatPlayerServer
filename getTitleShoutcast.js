@@ -19,6 +19,9 @@ function getV1Title(url, callback) {
     }
   };
   var res = request(options, function(error, response, body) {
+    if (error) {
+      console.log(error);
+    }
     var csv = body.stripTags();
     var csvArray = csv.split(",");
     var title = csv.split(",").slice(6).join(",");

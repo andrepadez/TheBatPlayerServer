@@ -23,7 +23,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
         if (jsonObject.recordings.length > 0) {
 
           var albums = jsonObject.recordings[0].releases;
-          albums = filterAlbums(albums);
+          albums = filterAlbums(albums, artist);
           var album = albums.last();
 
           // Fetch the album art from LastFM
@@ -48,6 +48,9 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
           });
 
         } else {
+          // Cache a null so we know not to make this request again in the future.
+          utils.cacheData(albumObjectCacheKey, null, 0);
+
           // Try the search again with sanitized strings
           var updatedArtist = utils.sanitize(artist);
           var updatedTrack = utils.sanitize(track);
@@ -112,17 +115,20 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       if (!error && result !== undefined) {
         callback(result);
       } else {
-        var encodedArtist = encodeURIComponent(artistName);
-        var encodedTrack = encodeURIComponent(trackName);
+        var encodedArtist = encodeURIComponent(artistName.trim());
+        var encodedTrack = encodeURIComponent(trackName.trim());
 
-        var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22+AND+type:album&fmt=json&limit=1";
+        // var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22+AND+type:album&fmt=json&limit=1";
+        var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
+
         console.log(url);
 
         request(url, function(error, response, body) {
+
           if (!error && response.statusCode == 200) {
             var jsonObject = JSON.parse(body);
-            callback(jsonObject);
             utils.cacheData(cacheKey, jsonObject, 0);
+            callback(jsonObject);
           }
         });
       }
@@ -133,12 +139,14 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
   }
   // Utilities
 
-function filterAlbums(albumsArray) {
+function filterAlbums(albumsArray, artistName) {
 
   // If there's only one then don't go through the below work.
   if (albumsArray.length === 1) {
     return albumsArray;
   }
+
+
 
   albumsArray.sort(function(a, b) {
 
@@ -150,6 +158,16 @@ function filterAlbums(albumsArray) {
     // If there's no date then demote its sort order
     if (!a.date) {
       return -1;
+    }
+
+    // If it has other artist credits than demote it
+    if (a.hasOwnProperty("artist-credit")) {
+      for (var i = 0; i < a["artist-credit"].length; i++) {
+        var singleArtistCredit = a["artist-credit"][i];
+        if (singleArtistCredit.name !== artistName) {
+          return -1;
+        }
+      }
     }
 
     // If it has a secondary album type then demote it
@@ -169,10 +187,14 @@ function filterAlbums(albumsArray) {
   i = albumsArray.length;
   while (i--) {
     var singleAlbum = albumsArray[i];
-    console.log(singleAlbum);
+    // console.log(singleAlbum);
     if (singleAlbum.status === "Official" && singleAlbum["release-group"]["primary-type"] === "Album") {
       updatedAlbums.push(singleAlbum);
     }
+  }
+
+  if (updatedAlbums.length === 0 && albumsArray.length > 0) {
+    updatedAlbums = albumsArray;
   }
 
   return updatedAlbums;

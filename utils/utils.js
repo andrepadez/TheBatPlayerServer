@@ -2,6 +2,8 @@ var request = require('request');
 var fs = require('fs');
 var imageColor = require("./imageColor.js");
 var md5 = require('MD5');
+var spawn = require('child_process').spawn;
+var exec = require('child_process').exec;
 
 function createTrackFromTitle(title) {
   titleArray = title.split(" - ");
@@ -53,18 +55,33 @@ function fixTrackTitle(trackString) {
 
 }
 
-var download = function(uri, filename, callback) {
-  if (uri) {
-    console.log("Downloading " + uri);
-    request.head(uri, function(err, res, body) {
-      // console.log('content-type:', res.headers['content-type']);
-      // console.log('content-length:', res.headers['content-length']);
+// var download = function(uri, filename, callback) {
+//   if (uri) {
+//     console.log("Downloading " + uri);
+//     request.head(uri, function(err, res, body) {
+//       // console.log('content-type:', res.headers['content-type']);
+//       // console.log('content-length:', res.headers['content-length']);
+//
+//       request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+//     });
+//   }
+// };
 
-      request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-    });
-  }
-};
+function download(url, filename, callback) {
+  fs.exists(filename, function(exists) {
+    if (!exists) {
+      var wget = 'wget -O ' + filename + ' ' + url;
 
+      var child = exec(wget, null, function(err, stdout, stderr) {
+        if (err) throw err;
+        else console.log(url + ' downloaded to ' + filename);
+        callback();
+      });
+    } else {
+      callback();
+    }
+  });
+}
 
 function sanitize(string) {
   if (string.indexOf("(") > -1) {

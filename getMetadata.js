@@ -12,6 +12,7 @@ S.extendPrototype();
 function fetchMetadataForUrl(url, req, mainCallback) {
 
   var track = null;
+  var fetchMethodCacheTime = 21600;
   var streamCacheKey = ("cache-stream-" + url).slugify();
 
   var sourceStreamCacheKey = ("cache-source-stream-" + url).slugify();
@@ -51,7 +52,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 track = utils.createTrackFromTitle(data.title);
                 track.station = data;
                 if (!metadataSource) {
-                  utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V1", 0);
+                  utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V1", fetchMethodCacheTime);
                 }
               }
               asyncCallback();
@@ -69,7 +70,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 track = utils.createTrackFromTitle(data.title);
                 track.station = data;
                 if (!metadataSource) {
-                  utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V2", 0);
+                  utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V2", fetchMethodCacheTime);
                 }
 
               }
@@ -87,9 +88,9 @@ function fetchMetadataForUrl(url, req, mainCallback) {
             streamtitle.getTitle(url, function(title) {
               if (title) {
                 track = utils.createTrackFromTitle(title);
-                if (!metadataSource) {
-                  utils.cacheData(streamFetchMethodCacheKey, "STREAM", 0);
-                }
+                track.station = {};
+                track.station.fetchsource = "STREAM";
+                utils.cacheData(streamFetchMethodCacheKey, "STREAM", fetchMethodCacheTime);
 
               }
               asyncCallback();

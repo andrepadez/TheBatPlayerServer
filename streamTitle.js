@@ -16,7 +16,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
   } else {
     port = url.port;
   }
-  // console.log("Connecting to " + url.hostname + " Port " + port);
+  console.log("Connecting to stream " + url.hostname + " Port " + port);
 
   client.connect(port, url.hostname, function() {
     // console.log("Connected to " + url.hostname);
