@@ -51,6 +51,8 @@ function fixTrackTitle(trackString) {
     }
 
     return titleArtist + " - " + titleSong;
+  } else {
+    return trackString;
   }
 
 }
