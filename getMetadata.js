@@ -5,6 +5,7 @@ var lastfm = require('./utils/lastfm.js');
 var async = require("async");
 var moment = require("moment");
 var album = require("./getAlbum.js");
+var md5 = require('MD5');
 
 var S = require('string');
 S.extendPrototype();
@@ -111,6 +112,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                     utils.getColorForImage(track.image.url, function(color) {
                       if (color) {
                         track.image.color = color;
+                        track.image.url = "http://api.thebatplayer.fm/mp3info/downloaded-images/" + md5(track.image.url);
                       }
                       callback();
                     });
@@ -201,7 +203,7 @@ function populateTrackObjectWithArtist(track, apiData) {
       var bioDate = moment(new Date(apiData.bio.published));
       var bioText = apiData.bio.summary.stripTags().trim().replace(/\n|\r/g, "");
 
-      track.artist = apiData.name.trim();
+      //track.artist = apiData.name.trim();
       track.image.url = apiData.image.last()["#text"];
       track.isOnTour = parseInt(apiData.ontour);
       track.bio.text = bioText;
@@ -223,7 +225,7 @@ function populateTrackObjectWithTrack(track, apiData) {
   if (apiData) {
     try {
       track.album.name = apiData.album.title;
-      track.artist = apiData.artist.name;
+      //track.artist = apiData.artist.name;
       track.album.image = apiData.album.image.last()["#text"];
       track.metaDataFetched = true;
 

@@ -1,55 +1,81 @@
-var onecolor = require('onecolor');
 var utils = require('./utils.js');
 var fs = require('fs');
 var md5 = require('MD5');
+var C = require('c0lor');
+var FlatColors = require("flatcolors");
 
 var ColorThief = require('color-thief');
 var colorThief = new ColorThief();
+var imagecolors = require('imagecolors');
+
+var ColorSpace = C.space.rgb['CIE-RGB'];
 
 function getColorForUrl(url, callback) {
   var path = "./tmp/" + md5(url);
   utils.download(url, path, function() {
 
-    var colorObject = {
-      rgb: {
-        red: null,
-        green: null,
-        blue: null
-      },
-      hex: null,
-      hsv: {
-        hue: null,
-        sat: null,
-        val: null
-      },
-      int: null
-    };
-
     try {
 
-      var image = fs.readFileSync(path);
-      var rgb = colorThief.getColor(image, 1);
+      // var image = fs.readFileSync(path);
 
-      colorObject.rgb.red = rgb[0];
-      colorObject.rgb.green = rgb[1];
-      colorObject.rgb.blue = rgb[2];
+      // var originalrgb = colorThief.getColor(image, 1);
+      imagecolors.extract(path, 1, function(err, colors) {
+        if (!err) {
+          var colorObject = buildColorObjectFromColors(colors);
+          callback(colorObject);
+        } else {
+          callback(null);
+        }
+      });
 
-      var rgbstring = "rgb(" + colorObject.rgb.red + "," + colorObject.rgb.green + "," + colorObject.rgb.blue + ")";
-      // var colorFormats = onecolor(rgbstring).black(0.5, true).saturation(1.0, true);
-      var colorFormats = onecolor(rgbstring);
-
-      colorObject.hex = colorFormats.hex();
-
-      colorObject.hsv.hue = Math.round(colorFormats.hsl().hue() * 65280);
-      colorObject.hsv.sat = Math.round(colorFormats.hsl().saturation() * 256);
-      colorObject.hsv.val = Math.round(colorFormats.value() * 256);
-      colorObject.int = 65536 * colorObject.rgb.red + 256 * colorObject.rgb.green + colorObject.rgb.blue;
     } catch (e) {
       console.log(e);
     }
 
-    callback(colorObject);
 
   });
 }
+
+function buildColorObjectFromColors(colors) {
+  var color = colors[0];
+
+  var colorObject = {
+    rgb: {
+      red: null,
+      green: null,
+      blue: null
+    },
+    hex: null,
+    int: null,
+    xyz: null
+  };
+
+  var rgb = FlatColors(color.rgb.r, color.rgb.g, color.rgb.b);
+  var originalRgb = [color.rgb.r, color.rgb.g, color.rgb.b];
+
+  colorObject.rgb.red = originalRgb[0];
+  colorObject.rgb.green = originalRgb[1];
+  colorObject.rgb.blue = originalRgb[2];
+  colorObject.hex = color.hex;
+  colorObject.int = 65536 * originalRgb[0] + 256 * originalRgb[1] + originalRgb[2];
+
+  // Doesn't work
+  //var colorFormats = C.RGB(rgb[0], rgb[1], rgb[2]);
+  //colorObject.xyz = ColorSpace.XYZ(colorFormats);
+  //
+
+  X = 1.076450 * rgb[0] - 0.237662 * rgb[1] + 0.161212 * rgb[2];
+  Y = 0.410964 * rgb[0] + 0.554342 * rgb[1] + 0.034694 * rgb[2];
+  Z = -0.010954 * rgb[0] - 0.013389 * rgb[1] + 1.024343 * rgb[2];
+
+  colorObject.xyz = {
+    x: X,
+    y: Y,
+    z: Z
+  };
+
+  return colorObject;
+
+}
+
 module.exports.getColorForUrl = getColorForUrl;

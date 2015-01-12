@@ -92,8 +92,14 @@ function sanitize(string) {
   if (string.indexOf(" ft") > -1) {
     string = string.substring(0, string.indexOf(" ft"));
   }
+  if (string.indexOf(" feat") > -1) {
+    string = string.substring(0, string.indexOf(" feat"));
+  }
   if (string.indexOf(" vs") > -1) {
     string = string.substring(0, string.indexOf(" vs"));
+  }
+  if (string.indexOf(" versus ") > -1) {
+    string = string.substring(0, string.indexOf(" versus "));
   }
 
   return string;

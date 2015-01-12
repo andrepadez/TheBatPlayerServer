@@ -108,37 +108,58 @@ function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObje
 
 
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
-    console.log("*** getAlbumsFromMusicbrainz");
+  console.log("*** getAlbumsFromMusicbrainz");
 
-    var cacheKey = ("musicbrainz-track-" + trackName + "-" + artistName).slugify();
-    memcacheClient.get(cacheKey, function(error, result) {
-      if (!error && result !== undefined) {
-        callback(result);
-      } else {
-        var encodedArtist = encodeURIComponent(artistName.trim());
-        var encodedTrack = encodeURIComponent(trackName.trim());
+  var cacheKey = ("musicbrainz-track-" + trackName + "-" + artistName).slugify();
+  memcacheClient.get(cacheKey, function(error, result) {
+    if (!error && result !== undefined) {
+      callback(result);
+    } else {
+      var encodedArtist = encodeURIComponent(artistName.trim());
+      var encodedTrack = encodeURIComponent(trackName.trim());
 
-        // var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22+AND+type:album&fmt=json&limit=1";
-        var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
+      var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
 
-        console.log(url);
+      console.log(url);
 
-        request(url, function(error, response, body) {
+      request(url, function(error, response, body) {
 
-          if (!error && response.statusCode == 200) {
-            var jsonObject = JSON.parse(body);
-            utils.cacheData(cacheKey, jsonObject, 0);
-            callback(jsonObject);
-          }
-        });
-      }
-    });
+        if (!error && response.statusCode == 200) {
+          var jsonObject = JSON.parse(body);
+          utils.cacheData(cacheKey, jsonObject, 0);
+          callback(jsonObject);
+        }
+      });
+    }
+  });
+}
 
+function getAlbumsFromDiscogs(artistName, trackName, callback) {
+  //https://api.discogs.com/database/search?type=release&artist=noisuf-x&track=noise+bouncing&key=wVixYWymHCBOxPnvBDuk&secret=vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm
+  console.log("*** getAlbumsFromDiscogs");
+  var cacheKey = ("discogs-track-" + trackName + "-" + artistName).slugify();
+  memcacheClient.get(cacheKey, function(error, result) {
+    if (!error && result !== undefined) {
+      callback(result);
+    } else {
+      var encodedArtist = encodeURIComponent(artistName.trim());
+      var encodedTrack = encodeURIComponent(trackName.trim());
 
+      var url = "https://api.discogs.com/database/search?type=release&artist=" + encodedArtist + "&track=" + encodedTrack + "&key=wVixYWymHCBOxPnvBDuk&secret=vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm";
+      console.log(url);
 
-  }
-  // Utilities
+      request(url, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+          var jsonObject = JSON.parse(body);
+          utils.cacheData(cacheKey, jsonObject, 0);
+          callback(jsonObject);
+        }
+      });
+    }
+  });
+}
 
+// Utilities
 function filterAlbums(albumsArray, artistName) {
 
   // If there's only one then don't go through the below work.
