@@ -13,64 +13,16 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
   var albumObjectCacheKey = ("cache-artist-" + artist + "track-" + track).slugify();
 
   memcacheClient.get(albumObjectCacheKey, function(error, result) {
+
     if (!error && result !== undefined) {
       mainCallback(null, result);
       return;
     } else {
-
-      getAlbumsFromMusicbrainz(artist, track, function(jsonObject) {
-
-        if (jsonObject.recordings.length > 0) {
-
-          var albums = jsonObject.recordings[0].releases;
-          albums = filterAlbums(albums, artist);
-          var album = albums.last();
-
-          // Fetch the album art from LastFM
-          lastfm.getAlbumDetails(artist, album.title, function(error, lastFmResult) {
-
-            if (lastFmResult) {
-              var albumObject = createAlbumObjectFromResults(lastFmResult, album);
-              utils.cacheData(albumObjectCacheKey, albumObject, 0);
-              mainCallback(error, albumObject);
-            } else {
-              console.log("All failed.  Fallback to LastFM.");
-
-              // Return whatever we get from Last.FM instead.
-              lastfm.getAlbumDetails(artist, album.title, function(error, albumResult) {
-                var albumObject = createAlbumObjectFromResults(albumResult, album);
-
-                console.log("Caching in fetchAlbumForArtistAndTrack");
-                utils.cacheData(albumObjectCacheKey, albumObject, 0);
-                mainCallback(error, albumObject);
-              });
-            }
-          });
-
-        } else {
-          // Cache a null so we know not to make this request again in the future.
-          utils.cacheData(albumObjectCacheKey, null, 0);
-
-          // Try the search again with sanitized strings
-          var updatedArtist = utils.sanitize(artist);
-          var updatedTrack = utils.sanitize(track);
-
-          if (updatedArtist != artist || updatedTrack != track) {
-            console.log("Making new api call");
-            hasRefetchedSanitizedTrack = true;
-            fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, mainCallback);
-          } else {
-            console.log("Giving up on MB and using Last.FM.");
-            // Return whatever we get from Last.FM instead.
-            lastfm.usingLastFM(artist, track, function(error, albumResult) {
-              var albumObject = createAlbumObjectFromResults(albumResult, null);
-              utils.cacheData(albumObjectCacheKey, albumObject, 0);
-              mainCallback(error, albumObject);
-            });
-          }
-        }
+      getAlbumsFromMusicbrainz(artist, track, function(albumObject) {
+        utils.cacheData(albumObjectCacheKey, albumObject, 0);
       });
     }
+
   });
 }
 
@@ -127,7 +79,56 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
         if (!error && response.statusCode == 200) {
           var jsonObject = JSON.parse(body);
           utils.cacheData(cacheKey, jsonObject, 0);
-          callback(jsonObject);
+
+          if (jsonObject.recordings.length > 0) {
+
+            var albums = jsonObject.recordings[0].releases;
+            albums = filterAlbums(albums, artistName);
+            var album = albums.last();
+
+            // Fetch the album art from LastFM
+            lastfm.getAlbumDetails(artistName, album.title, function(error, lastFmResult) {
+
+              if (lastFmResult) {
+                var albumObject = createAlbumObjectFromResults(lastFmResult, album);
+                utils.cacheData(albumObjectCacheKey, albumObject, 0);
+                mainCallback(error, albumObject);
+              } else {
+                console.log("All failed.  Fallback to LastFM.");
+
+                // Return whatever we get from Last.FM instead.
+                lastfm.getAlbumDetails(artist, album.title, function(error, albumResult) {
+                  var albumObject = createAlbumObjectFromResults(albumResult, album);
+
+                  console.log("Caching in fetchAlbumForArtistAndTrack");
+                  mainCallback(error, albumObject);
+                });
+              }
+            });
+
+          } else {
+            // Try the search again with sanitized strings
+            var updatedArtist = utils.sanitize(artistName);
+            var updatedTrack = utils.sanitize(trackName);
+
+            if (updatedArtist != artistName || updatedTrack != trackName) {
+              console.log("Making new api call");
+              hasRefetchedSanitizedTrack = true;
+              fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, mainCallback);
+            } else {
+              console.log("Giving up on MB and using Last.FM.");
+              // Return whatever we get from Last.FM instead.
+              lastfm.usingLastFM(artist, track, function(error, albumResult) {
+                var albumObject = createAlbumObjectFromResults(albumResult, null);
+                utils.cacheData(albumObjectCacheKey, albumObject, 0);
+                mainCallback(error, albumObject);
+              });
+            }
+          }
+
+
+
+          callback(albumObject);
         }
       });
     }
@@ -152,7 +153,10 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
         if (!error && response.statusCode === 200) {
           var jsonObject = JSON.parse(body);
           utils.cacheData(cacheKey, jsonObject, 0);
-          callback(jsonObject);
+
+          var albumJson = jsonObject.results[0];
+          var albumObject = createAlbumObject(albumJson.title, albomJson.thumb, albumJson.year, null);
+          callback(albumObject);
         }
       });
     }
