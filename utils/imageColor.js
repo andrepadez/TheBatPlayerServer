@@ -19,7 +19,7 @@ function getColorForUrl(url, callback) {
       // var image = fs.readFileSync(path);
 
       // var originalrgb = colorThief.getColor(image, 1);
-      imagecolors.extract(path, 1, function(err, colors) {
+      imagecolors.extract(path, 10, function(err, colors) {
         if (!err) {
           var colorObject = buildColorObjectFromColors(colors);
           callback(colorObject);
@@ -37,7 +37,7 @@ function getColorForUrl(url, callback) {
 }
 
 function buildColorObjectFromColors(colors) {
-  var color = colors[0];
+  var color = getColorFromColorArray(colors);
 
   var colorObject = {
     rgb: {
@@ -76,6 +76,32 @@ function buildColorObjectFromColors(colors) {
 
   return colorObject;
 
+}
+
+function getColorFromColorArray(colors) {
+  colors.sort(function(a, b) {
+    if (a.family == "dark") {
+      return -1;
+    }
+
+    if (a.luminance < b.luminance) {
+      return 1;
+    } else if (a.luminance == b.luminance) {
+      return 0;
+    } else {
+      return -1;
+    }
+  });
+
+  var color = colors[Math.floor(Math.random() * colors.length)];
+
+  return colors[3];
+}
+
+if (!Array.prototype.last) {
+  Array.prototype.last = function() {
+    return this[this.length - 1];
+  };
 }
 
 module.exports.getColorForUrl = getColorForUrl;
