@@ -15,10 +15,6 @@ function getColorForUrl(url, callback) {
   utils.download(url, path, function() {
 
     try {
-
-      // var image = fs.readFileSync(path);
-
-      // var originalrgb = colorThief.getColor(image, 1);
       imagecolors.extract(path, 1, function(err, colors) {
         if (!err) {
           var colorObject = buildColorObjectFromColors(colors);
@@ -37,7 +33,7 @@ function getColorForUrl(url, callback) {
 }
 
 function buildColorObjectFromColors(colors) {
-  var color = colors[0];
+  var color = getColorFromArray(colors);
 
   var colorObject = {
     rgb: {
@@ -75,7 +71,10 @@ function buildColorObjectFromColors(colors) {
   };
 
   return colorObject;
+}
 
+function getColorFromArray(colors) {
+  return colors[0];
 }
 
 module.exports.getColorForUrl = getColorForUrl;

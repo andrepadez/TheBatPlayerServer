@@ -113,6 +113,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                       if (color) {
                         track.image.color = color;
                         track.image.url = "http://api.thebatplayer.fm/mp3info/downloaded-images/" + md5(track.image.url);
+                        createArtistImage(track.image.url);
                       }
                       callback();
                     });
@@ -170,6 +171,11 @@ function fetchMetadataForUrl(url, req, mainCallback) {
       });
   });
 
+}
+
+function createArtistImage(originalUrl) {
+  var url = "http://api.thebatplayer.fm/mp3info-dev/artistImage.php?url=" + encodeURIComponent(originalUrl);
+  utils.download(url, "./tmp/" + md5(url), null);
 }
 
 function createEmptyTrack() {

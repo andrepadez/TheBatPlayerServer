@@ -77,10 +77,14 @@ function download(url, filename, callback) {
       var child = exec(wget, null, function(err, stdout, stderr) {
         if (err) throw err;
         else console.log(url + ' downloaded to ' + filename);
-        callback();
+        if (callback) {
+          callback();
+        }
       });
     } else {
-      callback();
+      if (callback) {
+        callback();
+      }
     }
   });
 }
