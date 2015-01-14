@@ -4,7 +4,17 @@ var utils = require("./utils/utils.js");
 var Memcached = require('memcached');
 global.memcacheClient = new Memcached();
 var lastfm = require("./utils/lastfm.js");
+var config = require("./config.js");
 var S = require('string');
+
+var NC = require('nodecogs');
+var discogs = new NC({
+  userAgent: 'TheBatPlayer ( http://thebatplayer.fm )',
+  accessKey: "wVixYWymHCBOxPnvBDuk",
+  accessSecret: "vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm"
+});
+
+
 S.extendPrototype();
 
 var hasRefetchedSanitizedTrack;
@@ -14,11 +24,12 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
 
   memcacheClient.get(albumObjectCacheKey, function(error, result) {
 
-    if (!error && result !== undefined) {
+    if (!error && result !== undefined && config.enableCache) {
       mainCallback(null, result);
       return;
     } else {
       getAlbumsFromMusicbrainz(artist, track, function(albumObject) {
+        mainCallback(error, albumObject);
         utils.cacheData(albumObjectCacheKey, albumObject, 0);
       });
     }
@@ -62,9 +73,9 @@ function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObje
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
   console.log("*** getAlbumsFromMusicbrainz");
 
-  var cacheKey = ("musicbrainz-track-" + trackName + "-" + artistName).slugify();
+  var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
-    if (!error && result !== undefined) {
+    if (!error && result !== undefined && config.enableCache) {
       callback(result);
     } else {
       var encodedArtist = encodeURIComponent(artistName.trim());
@@ -72,7 +83,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
 
-      console.log(url);
+      // console.log(url);
 
       request(url, function(error, response, body) {
 
@@ -88,20 +99,19 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
             // Fetch the album art from LastFM
             lastfm.getAlbumDetails(artistName, album.title, function(error, lastFmResult) {
-
               if (lastFmResult) {
                 var albumObject = createAlbumObjectFromResults(lastFmResult, album);
-                utils.cacheData(albumObjectCacheKey, albumObject, 0);
-                mainCallback(error, albumObject);
+                utils.cacheData(cacheKey, albumObject, 0);
+                callback(albumObject);
               } else {
                 console.log("All failed.  Fallback to LastFM.");
 
                 // Return whatever we get from Last.FM instead.
-                lastfm.getAlbumDetails(artist, album.title, function(error, albumResult) {
+                lastfm.getAlbumDetails(artistName, album.title, function(error, albumResult) {
                   var albumObject = createAlbumObjectFromResults(albumResult, album);
 
                   console.log("Caching in fetchAlbumForArtistAndTrack");
-                  mainCallback(error, albumObject);
+                  callback(error, albumObject);
                 });
               }
             });
@@ -118,17 +128,14 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             } else {
               console.log("Giving up on MB and using Last.FM.");
               // Return whatever we get from Last.FM instead.
-              lastfm.usingLastFM(artist, track, function(error, albumResult) {
+              lastfm.usingLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
                 utils.cacheData(albumObjectCacheKey, albumObject, 0);
-                mainCallback(error, albumObject);
+                callback(error, albumObject);
               });
             }
           }
-
-
-
-          callback(albumObject);
+          // callback(albumObject);
         }
       });
     }
@@ -138,25 +145,39 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 function getAlbumsFromDiscogs(artistName, trackName, callback) {
   //https://api.discogs.com/database/search?type=release&artist=noisuf-x&track=noise+bouncing&key=wVixYWymHCBOxPnvBDuk&secret=vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm
   console.log("*** getAlbumsFromDiscogs");
-  var cacheKey = ("discogs-track-" + trackName + "-" + artistName).slugify();
+  var cacheKey = ("discogsAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
-    if (!error && result !== undefined) {
+    if (!error && result !== undefined && config.enableCache) {
       callback(result);
     } else {
-      var encodedArtist = encodeURIComponent(artistName.trim());
-      var encodedTrack = encodeURIComponent(trackName.trim());
 
-      var url = "https://api.discogs.com/database/search?type=release&artist=" + encodedArtist + "&track=" + encodedTrack + "&key=wVixYWymHCBOxPnvBDuk&secret=vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm";
-      console.log(url);
-
-      request(url, function(error, response, body) {
-        if (!error && response.statusCode === 200) {
-          var jsonObject = JSON.parse(body);
-          utils.cacheData(cacheKey, jsonObject, 0);
-
-          var albumJson = jsonObject.results[0];
-          var albumObject = createAlbumObject(albumJson.title, albomJson.thumb, albumJson.year, null);
-          callback(albumObject);
+      discogs.search({
+        type: 'release',
+        artist: artistName,
+        track: trackName,
+        format: "album",
+        page: 0,
+        per_page: 1
+      }, function(err, response) {
+        if (!err) {
+          if (response.results.length > 0) {
+            var singleAlbum = response.results[0];
+            var albumObject = createAlbumObject(singleAlbum.title, singleAlbum.thumb, singleAlbum.year, null);
+            utils.cacheData(cacheKey, albumObject, 0);
+            callback(albumObject);
+          } else {
+            var updatedArtist = utils.sanitize(artistName);
+            var updatedTrack = utils.sanitize(trackName);
+            if (updatedArtist != artistName || updatedTrack != trackName) {
+              getAlbumsFromDiscogs(updatedArtist, updatedTrack, callback);
+              return;
+            } else {
+              callback(null);
+            }
+          }
+        } else {
+          console.log(err);
+          callback(null);
         }
       });
     }
@@ -234,3 +255,5 @@ if (!Array.prototype.last) {
 }
 
 module.exports.fetchAlbumForArtistAndTrack = fetchAlbumForArtistAndTrack;
+module.exports.getAlbumsFromDiscogs = getAlbumsFromDiscogs;
+module.exports.getAlbumsFromMusicbrainz = getAlbumsFromMusicbrainz;
