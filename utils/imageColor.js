@@ -84,6 +84,14 @@ function getColorFromColorArray(colors) {
       return -1;
     }
 
+    if (a.family == "white") {
+      return -1;
+    }
+
+    if (a.family == "black") {
+      return -1;
+    }
+
     if (a.luminance < b.luminance) {
       return 1;
     } else if (a.luminance == b.luminance) {
