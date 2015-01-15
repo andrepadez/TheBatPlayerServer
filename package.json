@@ -31,6 +31,7 @@
     "forever": "~0.14.0",
     "connect-timeout": "~1.5.0",
     "dominant-color": "0.0.1",
-    "colour-extractor": "~0.2.1"
+    "colour-extractor": "~0.2.1",
+    "coverart": "0.0.1"
   }
 }
