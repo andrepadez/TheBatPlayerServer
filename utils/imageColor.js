@@ -101,9 +101,17 @@ function getColorFromColorArray(colors) {
     }
   });
 
-  var color = colors[Math.floor(Math.random() * colors.length)];
+  var index = 3;
+  var selectedColor = colors[3];
 
-  return colors[3];
+  // If per chance we selected something we don't want then remedy that.
+  while (selectedColor.family == "dark" || selectedColor.family == "black") {
+    index--;
+    if (index === 0) {
+      break;
+    }
+  }
+  return colors[index];
 }
 
 if (!Array.prototype.last) {
