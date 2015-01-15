@@ -112,7 +112,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                     utils.getColorForImage(track.image.url, function(color) {
                       if (color) {
                         track.image.color = color;
-                        track.image.url = "http://api.thebatplayer.fm/mp3info/downloaded-images/" + md5(track.image.url);
                       }
                       callback();
                     });
