@@ -1,7 +1,7 @@
 var album = require("../getAlbum.js");
 
-var artist = "Beck";
-var track = "Loser";
+var artist = "And One";
+var track = "Shouts of Joy (Club Mix)";
 
 var start = new Date();
 

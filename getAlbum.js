@@ -206,6 +206,7 @@ function filterAlbums(albumsArray, artistName) {
       return -1;
     }
 
+
     // If it has other artist credits than demote it
     if (a.hasOwnProperty("artist-credit")) {
       for (var i = 0; i < a["artist-credit"].length; i++) {
@@ -225,6 +226,8 @@ function filterAlbums(albumsArray, artistName) {
 
     }
 
+
+
     return aDate - bDate;
   });
 
@@ -233,8 +236,7 @@ function filterAlbums(albumsArray, artistName) {
   i = albumsArray.length;
   while (i--) {
     var singleAlbum = albumsArray[i];
-    // console.log(singleAlbum);
-    if (singleAlbum.status === "Official" && singleAlbum["release-group"]["primary-type"] === "Album") {
+    if (singleAlbum.status === "Official" && (singleAlbum["release-group"]["primary-type"] === "Album" || singleAlbum["release-group"]["primary-type"] === "Single")) {
       updatedAlbums.push(singleAlbum);
     }
   }
