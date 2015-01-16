@@ -25,13 +25,17 @@
     "memcached": "^2.0.0",
     "xml2js": "^0.4.4",
     "moment": "^2.8.4",
-    "musicbrainz": "^0.2.4",
-    "nodebrainz": "^1.0.1",
     "newrelic": "^1.14.5",
-    "forever": "~0.14.0",
+    "forever": "~0.13.0",
     "connect-timeout": "~1.5.0",
     "dominant-color": "0.0.1",
     "colour-extractor": "~0.2.1",
     "coverart": "0.0.1"
+    "colour-extractor": "~0.2.1",
+    "c0lor": "^0.1.0",
+    "flatcolors": "^0.1.0",
+    "imagecolors": "^0.10.5",
+    "nodecogs": "git://github.com/gabek/nodecogs.git",
+    "disconnect": "git://github.com/wxdu/disconnect.git"
   }
 }
