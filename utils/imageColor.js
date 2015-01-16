@@ -19,7 +19,7 @@ function getColorForUrl(url, callback) {
 
       // var originalrgb = colorThief.getColor(image, 1);
       imagecolors.extract(path, 10, function(err, colors) {
-        if (!err) {
+        if (!err && colors > 0) {
           var colorObject = buildColorObjectFromColors(colors);
           callback(colorObject);
         } else {
