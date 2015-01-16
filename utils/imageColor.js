@@ -111,10 +111,10 @@ function getColorFromColorArray(colors) {
   while (selectedColor.family == "dark" || selectedColor.family == "black") {
     index++;
     if (index === colors.length - 1) {
-      return colors[0];
+      return colors[3];
     }
   }
-  // console.log(colors[index]);
+  console.log(colors[index]);
   return colors[index];
 }
 
