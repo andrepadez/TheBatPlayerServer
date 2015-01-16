@@ -79,6 +79,7 @@ function buildColorObjectFromColors(colors) {
 }
 
 function getColorFromColorArray(colors) {
+
   colors.sort(function(a, b) {
     if (a.family == "dark") {
       return -1;
@@ -92,6 +93,10 @@ function getColorFromColorArray(colors) {
       return -1;
     }
 
+    if (a.percent < 10) {
+      return -1;
+    }
+
     if (a.luminance < b.luminance) {
       return 1;
     } else if (a.luminance == b.luminance) {
@@ -101,16 +106,17 @@ function getColorFromColorArray(colors) {
     }
   });
 
-  var index = 3;
-  var selectedColor = colors[3];
+  var index = 0;
+  var selectedColor = colors[index];
 
   // If per chance we selected something we don't want then remedy that.
   while (selectedColor.family == "dark" || selectedColor.family == "black") {
-    index--;
-    if (index === 0) {
-      break;
+    index++;
+    if (index === colors.length - 1) {
+      return colors[0];
     }
   }
+  // console.log(colors[index]);
   return colors[index];
 }
 
