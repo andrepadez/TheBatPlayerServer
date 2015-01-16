@@ -4,6 +4,7 @@ var imageColor = require("./imageColor.js");
 var md5 = require('MD5');
 var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
+var config = require("../config.js");
 
 function createTrackFromTitle(title) {
   titleArray = title.split(" - ");
@@ -56,18 +57,6 @@ function fixTrackTitle(trackString) {
   }
 
 }
-
-// var download = function(uri, filename, callback) {
-//   if (uri) {
-//     console.log("Downloading " + uri);
-//     request.head(uri, function(err, res, body) {
-//       // console.log('content-type:', res.headers['content-type']);
-//       // console.log('content-length:', res.headers['content-length']);
-//
-//       request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
-//     });
-//   }
-// };
 
 function download(url, filename, callback) {
   fs.exists(filename, function(exists) {

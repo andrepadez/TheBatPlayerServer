@@ -1,4 +1,6 @@
 var utils = require("./utils.js");
+var config = require("../config.js");
+
 var LastfmAPI = require('lastfmapi');
 var lastfm = new LastfmAPI({
   api_key: "62be1c8445c92c28e5b36f548c069f69"
@@ -26,7 +28,7 @@ function getAlbumDetails(artistName, albumName, callback) {
   var cacheKey = ("cache-album-" + albumName + "-" + artistName).slugify();
 
   global.memcacheClient.get(cacheKey, function(error, result) {
-    if (!error && result !== undefined) {
+    if (!error && result !== undefined && config.enableCache) {
       // console.log("Fetched album from cache");
       callback(error, result);
     } else {
@@ -47,7 +49,7 @@ function getTrackDetails(artistName, trackName, callback) {
   var cacheKey = ("cache-track-" + trackName + "-" + artistName).slugify();
 
   global.memcacheClient.get(cacheKey, function(error, result) {
-    if (!error && result !== undefined) {
+    if (!error && result !== undefined && config.enableCache) {
       // console.log("Fetched track from cache");
       callback(error, result);
     } else {
@@ -76,7 +78,7 @@ function getArtistDetails(artistName, callback) {
   var artistCacheKey = ("cache-artist-" + artistName).slugify();
 
   global.memcacheClient.get(artistCacheKey, function(error, result) {
-    if (!error && result !== undefined) {
+    if (!error && result !== undefined && config.enableCache) {
       callback(error, result);
     } else {
       lastfm.artist.getInfo({
