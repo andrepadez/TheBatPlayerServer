@@ -124,13 +124,12 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             if (updatedArtist != artistName || updatedTrack != trackName) {
               console.log("Making new api call");
               hasRefetchedSanitizedTrack = true;
-              fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, mainCallback);
+              fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, callback);
             } else {
               console.log("Giving up on MB and using Last.FM.");
               // Return whatever we get from Last.FM instead.
               lastfm.usingLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
-                utils.cacheData(albumObjectCacheKey, albumObject, 0);
                 callback(error, albumObject);
               });
             }
