@@ -19,7 +19,8 @@ function getColorForUrl(url, callback) {
 
       // var originalrgb = colorThief.getColor(image, 1);
       imagecolors.extract(path, 10, function(err, colors) {
-        if (!err && colors > 0) {
+
+        if (!err && colors.length > 0) {
           var colorObject = buildColorObjectFromColors(colors);
           callback(colorObject);
         } else {
@@ -103,6 +104,7 @@ function getColorFromColorArray(colors) {
       return -1;
     }
   });
+
 
   var index = 0;
   var selectedColor = colors[index];
