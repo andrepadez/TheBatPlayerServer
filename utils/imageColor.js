@@ -116,7 +116,6 @@ function getColorFromColorArray(colors) {
       return colors[3];
     }
   }
-  console.log(colors[index]);
   return colors[index];
 }
 
