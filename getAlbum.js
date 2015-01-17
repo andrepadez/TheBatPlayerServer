@@ -17,8 +17,6 @@ var discogs = new NC({
 
 S.extendPrototype();
 
-var hasRefetchedSanitizedTrack;
-
 function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
   var albumObjectCacheKey = ("cache-artist-" + artist + "track-" + track).slugify();
 
@@ -123,7 +121,6 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
             if (updatedArtist != artistName || updatedTrack != trackName) {
               console.log("Making new api call");
-              hasRefetchedSanitizedTrack = true;
               fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, callback);
             } else {
               console.log("Giving up on MB and using Last.FM.");
@@ -134,7 +131,6 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
               });
             }
           }
-          // callback(albumObject);
         }
       });
     }
