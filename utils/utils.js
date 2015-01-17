@@ -79,23 +79,25 @@ function download(url, filename, callback) {
 }
 
 function sanitize(string) {
-  if (string.indexOf("(") > -1) {
-    string = string.substring(0, string.indexOf("("));
+  var checkString = string.toLowerCase();
+
+  if (checkString.indexOf("(") > -1) {
+    string = string.substring(0, checkString.indexOf("("));
   }
-  if (string.indexOf(" ft") > -1) {
-    string = string.substring(0, string.indexOf(" ft"));
+  if (checkString.indexOf(" ft") > -1) {
+    string = string.substring(0, checkString.indexOf(" ft"));
   }
-  if (string.indexOf(" feat") > -1) {
-    string = string.substring(0, string.indexOf(" feat"));
+  if (checkString.indexOf(" feat") > -1) {
+    string = string.substring(0, checkString.indexOf(" feat"));
   }
-  if (string.indexOf(" vs") > -1) {
-    string = string.substring(0, string.indexOf(" vs"));
+  if (checkString.indexOf(" vs") > -1) {
+    string = string.substring(0, checkString.indexOf(" vs"));
   }
-  if (string.indexOf(" versus ") > -1) {
-    string = string.substring(0, string.indexOf(" versus "));
+  if (checkString.indexOf(" versus ") > -1) {
+    string = string.substring(0, checkString.indexOf(" versus "));
   }
-  if (string.indexOf(" [") > -1) {
-    string = string.substring(0, string.indexOf(" ["));
+  if (checkString.indexOf(" [") > -1) {
+    string = string.substring(0, checkString.indexOf(" ["));
   }
 
   return string;
