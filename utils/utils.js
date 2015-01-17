@@ -94,6 +94,9 @@ function sanitize(string) {
   if (string.indexOf(" versus ") > -1) {
     string = string.substring(0, string.indexOf(" versus "));
   }
+  if (string.indexOf(" [") > -1) {
+    string = string.substring(0, string.indexOf(" ["));
+  }
 
   return string;
 }
