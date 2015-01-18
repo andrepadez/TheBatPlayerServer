@@ -104,8 +104,8 @@ function sanitize(string) {
 }
 
 function cacheData(key, value, lifetime) {
-  console.log("Caching: " + key);
-  if (key && value) {
+  if (config.enableCache && key && value) {
+    console.log("Caching: " + key);
     memcacheClient.set(key, value, lifetime, function(err) {
       if (err) {
         console.log(err);

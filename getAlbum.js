@@ -30,7 +30,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
       mainCallback(null, result);
       return;
     } else {
-      getAlbumsFromMusicbrainz(artist, track, function(albumObject) {
+      getAlbumsFromMusicbrainz(artist, track, function(error, albumObject) {
         mainCallback(error, albumObject);
         utils.cacheData(albumObjectCacheKey, albumObject, 0);
       });
@@ -78,13 +78,14 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
   var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
-      callback(result);
+      callback(error, result);
+      return;
     } else {
       var encodedArtist = encodeURIComponent(artistName.trim());
       var encodedTrack = encodeURIComponent(trackName.trim());
 
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
-      // console.log(url);
+      //console.log(url);
 
       request(url, function(error, response, body) {
 
@@ -103,12 +104,15 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
                 var albumObject = createAlbumObjectFromResults(lastFmResult, album);
                 albumObject.mbid = album.id;
                 utils.cacheData(cacheKey, albumObject, 0);
+
+                // Try another approach to getting the album art
                 if (albumObject.image === '') {
                   getAlbumArtFromDiscogs(albumObject, callback);
                 } else {
                   utils.cacheData(cacheKey, albumObject, 0);
-                  callback(albumObject);
+                  callback(error, albumObject);
                 }
+
               } else {
                 console.log("All failed.  Fallback to LastFM.");
 
@@ -148,6 +152,8 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 }
 
 function getAlbumArtFromDiscogs(albumObject, callback) {
+  console.log("Fetching album art from Discogs");
+
   if (albumObject.mbid !== '') {
     ca.release(albumObject.mbid, {}, function(err, response) {
       if (response && response.images.length > 0) {
@@ -155,7 +161,6 @@ function getAlbumArtFromDiscogs(albumObject, callback) {
         albumObject.image = imageObject.image;
       }
       callback(albumObject);
-      // console.log(response);
     });
 
   } else {

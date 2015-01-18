@@ -1,7 +1,7 @@
 var album = require("../getAlbum.js");
 
-var artist = "Razed in Black";
-var track = "Blush";
+var artist = "Icon of Coil";
+var track = "Situations Like These (single version)";
 
 var start = new Date();
 
@@ -12,7 +12,7 @@ var start = new Date();
 //   console.info("Discogs Execution time: %dms", end);
 // });
 
-album.getAlbumsFromMusicbrainz(artist, track, function(albumObject) {
+album.getAlbumsFromMusicbrainz(artist, track, function(error, albumObject) {
   console.log("-=Musicbrainz=-");
   console.log(albumObject);
   var end = new Date() - start;
