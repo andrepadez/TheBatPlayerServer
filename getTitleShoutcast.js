@@ -22,6 +22,7 @@ function getV1Title(url, callback) {
     if (error || body === undefined) {
       console.log(error);
       callback(null);
+      return;
     }
     var csv = body.stripTags();
     var csvArray = csv.split(",");
