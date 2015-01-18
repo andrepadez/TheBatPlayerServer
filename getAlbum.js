@@ -72,10 +72,11 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             var albums = jsonObject.recordings[0].releases;
             albums = filterAlbums(albums, artistName);
             var album = albums.last();
+            var albumObject = createAlbumObject(album.title, null, album.date, album.id);
 
             // Fetch the album art from LastFM
             albumFromLastFM(artistName, album.title, function(error, albumResult) {
-              var albumObject = createAlbumObjectFromResults(albumResult, album);
+              albumObject = createAlbumObjectFromResults(albumResult, album);
 
               // If album art is still empty use Discogs
               if (albumObject && albumObject.image === '') {
@@ -94,6 +95,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             if (!willRetry) {
               console.log("Giving up on MB and using Last.FM.");
               albumFromLastFM(artistName, trackName, function(error, albumResult) {
+                console.log(albumResult);
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
                 utils.cacheData(cacheKey, albumObject, 0);
                 callback(error, albumObject);
@@ -130,6 +132,7 @@ function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObje
 function albumFromLastFM(artistName, albumName, callback) {
   console.log("Using LastFM.");
   lastfm.getAlbumDetails(artistName, albumName, function(error, albumResult) {
+    // console.log(albumResult);
     callback(error, albumResult);
   });
 
