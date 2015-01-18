@@ -150,7 +150,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 function getAlbumArtFromDiscogs(albumObject, callback) {
   if (albumObject.mbid !== '') {
     ca.release(albumObject.mbid, {}, function(err, response) {
-      if (response.images.length > 0) {
+      if (response.hasOwnProperty("images") && response.images.length > 0) {
         var imageObject = response.images[0];
         albumObject.image = imageObject.image;
       }
