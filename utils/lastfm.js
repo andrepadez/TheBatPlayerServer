@@ -85,9 +85,7 @@ function getArtistDetails(artistName, callback) {
         artist: artistName,
         autocorrect: 1
       }, function(err, artistDetails) {
-        console.log("Caching in getArtistDetails");
         utils.cacheData(artistCacheKey, artistDetails, 0);
-
         callback(err, artistDetails);
       });
     }

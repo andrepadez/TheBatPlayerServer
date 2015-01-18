@@ -104,33 +104,19 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
         function(asyncCallback) {
           if (track) {
+
             async.parallel([
 
                 async.series([
-                  // Artist details
                   function(callback) {
-                    lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
-                      populateTrackObjectWithArtist(track, artistDetails);
-
-                      callback();
-                    });
-
+                    getArtistDetails(track, callback);
                   },
-
-                  // Color
                   function(callback) {
-                    if (track.image.url) {
-                      utils.getColorForImage(track.image.url, function(color) {
-                        if (color) {
-                          track.image.color = color;
-                        }
-                        callback();
-                      });
-                    } else {
-                      callback();
-                    }
+                    getColor(track, callback);
                   }
-                ]),
+                ], function(err, results) {
+                  asyncCallback();
+                }),
 
                 // Track Details
                 function(callback) {
@@ -175,12 +161,34 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         }
         expires = Math.round(new Date().getTime() / 1000) + 5;
         track.expires = expires;
+        utils.cacheData(streamCacheKey, track, 5);
 
         mainCallback(track);
-        utils.cacheData(streamCacheKey, track, 5);
         //cleanup();
       });
   });
+
+}
+
+function getArtistDetails(track, callback) {
+  lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
+    populateTrackObjectWithArtist(track, artistDetails);
+
+    callback();
+  });
+}
+
+function getColor(track, callback) {
+  if (track.image.url) {
+    utils.getColorForImage(track.image.url, function(color) {
+      if (color) {
+        track.image.color = color;
+      }
+      callback();
+    });
+  } else {
+    callback();
+  }
 
 }
 
