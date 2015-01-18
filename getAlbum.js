@@ -2,21 +2,20 @@ var moment = require("moment");
 var request = require('request');
 var utils = require("./utils/utils.js");
 var Memcached = require('memcached');
-global.memcacheClient = new Memcached();
 var lastfm = require("./utils/lastfm.js");
 var config = require("./config.js");
 var S = require('string');
 
 var NC = require('nodecogs');
 var discogs = new NC({
-  userAgent: 'TheBatPlayer ( http://thebatplayer.fm )',
+  userAgent: config.useragent,
   accessKey: "wVixYWymHCBOxPnvBDuk",
   accessSecret: "vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm"
 });
 
 var CA = require('coverart');
 var ca = new CA({
-  userAgent: 'TheBatPlayer ( http://thebatplayer.fm )'
+  userAgent: config.useragent
 });
 
 S.extendPrototype();
@@ -28,11 +27,10 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
 
     if (!error && result !== undefined && config.enableCache) {
       mainCallback(null, result);
-      return;
     } else {
       getAlbumsFromMusicbrainz(artist, track, function(error, albumObject) {
-        mainCallback(error, albumObject);
         utils.cacheData(albumObjectCacheKey, albumObject, 0);
+        mainCallback(error, albumObject);
       });
     }
 
@@ -49,29 +47,6 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
   return albumObject;
 }
 
-function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObject) {
-  var albumObject = null;
-
-  if (lastFmAlbumResultObject) {
-    var albumTitle = lastFmAlbumResultObject.name;
-    var image = lastFmAlbumResultObject.image.last()["#text"];
-    var releaseDate;
-    if (mbAlbumResultObject && mbAlbumResultObject.date) {
-      releaseDate = moment(new Date(mbAlbumResultObject.date.trim())).year();
-    } else if (lastFmAlbumResultObject.releasedate) {
-      releaseDate = moment(new Date(lastFmAlbumResultObject.releasedate.trim())).year();
-    }
-
-    albumObject = createAlbumObject(albumTitle, image, releaseDate, lastFmAlbumResultObject.mbid);
-  }
-
-  return albumObject;
-
-}
-
-
-
-
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
   console.log("*** getAlbumsFromMusicbrainz");
 
@@ -85,7 +60,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       var encodedTrack = encodeURIComponent(trackName.trim());
 
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
-      //console.log(url);
+      console.log(url);
 
       request(url, function(error, response, body) {
 
@@ -99,46 +74,26 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             var album = albums.last();
 
             // Fetch the album art from LastFM
-            lastfm.getAlbumDetails(artistName, album.title, function(error, lastFmResult) {
-              if (lastFmResult) {
-                var albumObject = createAlbumObjectFromResults(lastFmResult, album);
-                albumObject.mbid = album.id;
-                utils.cacheData(cacheKey, albumObject, 0);
+            albumFromLastFM(artistName, album.title, function(error, albumResult) {
+              var albumObject = createAlbumObjectFromResults(albumResult, album);
 
-                // Try another approach to getting the album art
-                if (albumObject.image === '') {
-                  getAlbumArtFromDiscogs(albumObject, callback);
-                } else {
-                  utils.cacheData(cacheKey, albumObject, 0);
-                  callback(error, albumObject);
-                }
-
+              // If album art is still empty use Discogs
+              if (albumObject && albumObject.image === '') {
+                getAlbumArtFromDiscogs(albumObject, callback);
               } else {
-                console.log("All failed.  Fallback to LastFM.");
-
-                // Return whatever we get from Last.FM instead.
-                lastfm.getAlbumDetails(artistName, album.title, function(error, albumResult) {
-                  var albumObject = createAlbumObjectFromResults(albumResult, album);
-
-                  console.log("Caching in fetchAlbumForArtistAndTrack");
-                  utils.cacheData(cacheKey, albumObject, 0);
-                  callback(error, albumObject);
-                });
+                callback(error, albumObject);
               }
+
             });
 
           } else {
             // Try the search again with sanitized strings
-            var updatedArtist = utils.sanitize(artistName);
-            var updatedTrack = utils.sanitize(trackName);
+            var willRetry = retrySanitized(artistName, trackName, callback);
 
-            if (updatedArtist != artistName || updatedTrack != trackName) {
-              console.log("Making new api call");
-              fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, callback);
-            } else {
+            // Return whatever we get from Last.FM instead.
+            if (!willRetry) {
               console.log("Giving up on MB and using Last.FM.");
-              // Return whatever we get from Last.FM instead.
-              lastfm.usingLastFM(artistName, trackName, function(error, albumResult) {
+              albumFromLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
                 utils.cacheData(cacheKey, albumObject, 0);
                 callback(error, albumObject);
@@ -151,6 +106,50 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
   });
 }
 
+function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObject) {
+  var albumObject = null;
+
+  if (lastFmAlbumResultObject) {
+    var albumTitle = lastFmAlbumResultObject.name;
+    var image = lastFmAlbumResultObject.image.last()["#text"];
+    var releaseDate;
+
+    if (mbAlbumResultObject && mbAlbumResultObject.date) {
+      releaseDate = moment(new Date(mbAlbumResultObject.date.trim())).year();
+    } else if (lastFmAlbumResultObject.releasedate) {
+      releaseDate = moment(new Date(lastFmAlbumResultObject.releasedate.trim())).year();
+    }
+
+    albumObject = createAlbumObject(albumTitle, image, releaseDate, lastFmAlbumResultObject.mbid);
+  }
+
+  return albumObject;
+}
+
+
+function albumFromLastFM(artistName, albumName, callback) {
+  console.log("Using LastFM.");
+  lastfm.getAlbumDetails(artistName, albumName, function(error, albumResult) {
+    callback(error, albumResult);
+  });
+
+}
+
+function retrySanitized(artistName, trackName, callback) {
+  var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
+
+  var updatedArtist = utils.sanitize(artistName);
+  var updatedTrack = utils.sanitize(trackName);
+
+  if (updatedArtist != artistName || updatedTrack != trackName) {
+    fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, callback);
+    return true;
+  } else {
+    return false;
+  }
+
+}
+
 function getAlbumArtFromDiscogs(albumObject, callback) {
   console.log("Fetching album art from Discogs");
 
@@ -160,11 +159,11 @@ function getAlbumArtFromDiscogs(albumObject, callback) {
         var imageObject = response.images[0];
         albumObject.image = imageObject.image;
       }
-      callback(albumObject);
+      callback(error, albumObject);
     });
 
   } else {
-    callback(albumObject);
+    callback(error, albumObject);
   }
 }
 
@@ -174,7 +173,7 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
   var cacheKey = ("discogsAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
-      callback(result);
+      callback(null, result);
     } else {
 
       discogs.search({
@@ -262,7 +261,7 @@ function filterAlbums(albumsArray, artistName) {
   i = albumsArray.length;
   while (i--) {
     var singleAlbum = albumsArray[i];
-    if (singleAlbum.status === "Official" && (singleAlbum["release-group"]["primary-type"] === "Album" || singleAlbum["release-group"]["primary-type"] === "Single")) {
+    if (singleAlbum.status === "Official" && (singleAlbum["release-group"]["primary-type"] === "Album" || singleAlbum["release-group"]["primary-type"] === "Single" || singleAlbum["release-group"]["primary-type"] === "EP")) {
       updatedAlbums.push(singleAlbum);
     }
   }

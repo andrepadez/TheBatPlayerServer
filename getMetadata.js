@@ -133,7 +133,9 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 // Get Album for track
                 function(callback) {
                   if (track.artist && track.song) {
-                    getAlbumDetails(track, callback);
+                    getAlbumDetails(track, function(albumObject) {
+                      track.album = albumObject;
+                    });
                   } else {
                     track.album = null;
                     callback();
@@ -183,8 +185,7 @@ function getTrackDetails(track, callback) {
 
 function getAlbumDetails(track, callback) {
   album.fetchAlbumForArtistAndTrack(track.artist, track.song, function(error, albumDetails) {
-    track.album = albumDetails;
-    callback();
+    callback(albumDetails);
   });
 }
 

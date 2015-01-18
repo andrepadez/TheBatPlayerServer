@@ -37,7 +37,7 @@ function getAlbumDetails(artistName, albumName, callback) {
         album: albumName,
         autocorrect: 1
       }, function(err, albumDetails) {
-        console.log("Fetched album from api");
+        console.log("Fetched album from lastfm");
         utils.cacheData(cacheKey, albumDetails, 0);
         callback(err, albumDetails);
       });
@@ -50,7 +50,6 @@ function getTrackDetails(artistName, trackName, callback) {
 
   global.memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
-      // console.log("Fetched track from cache");
       callback(error, result);
     } else {
       var track;
@@ -61,7 +60,7 @@ function getTrackDetails(artistName, trackName, callback) {
           autocorrect: 1
         }, function(err, trackDetails) {
           track = trackDetails;
-          console.log("Fetched track from api");
+          console.log("Fetched track from lastfm");
           utils.cacheData(cacheKey, trackDetails, 0);
         });
       } catch (e) {
