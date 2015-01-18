@@ -1,7 +1,7 @@
 var album = require("../getAlbum.js");
 
-var artist = "And One";
-var track = "Shouts of Joy (Club Mix)";
+var artist = "Razed in Black";
+var track = "Blush";
 
 var start = new Date();
 
