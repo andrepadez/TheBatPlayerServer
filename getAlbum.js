@@ -159,11 +159,11 @@ function getAlbumArtFromDiscogs(albumObject, callback) {
         var imageObject = response.images[0];
         albumObject.image = imageObject.image;
       }
-      callback(error, albumObject);
+      callback(err, albumObject);
     });
 
   } else {
-    callback(error, albumObject);
+    callback(null, albumObject);
   }
 }
 
