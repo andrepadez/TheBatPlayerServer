@@ -110,15 +110,13 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 function(callback) {
                   lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
                     populateTrackObjectWithArtist(track, artistDetails);
-                    utils.getColorForImage(track.image.url, function(color) {
-                      if (color) {
-                        track.image.color = color;
-                        //createArtistImage(track.image.url);
-                        // track.image.url = "http://api.thebatplayer.fm/mp3info/downloaded-images/" + md5(track.image.url);
-                        // createArtistImage(track.image.url);
-                      }
-                      callback();
-                    });
+                    // utils.getColorForImage(track.image.url, function(color) {
+                    //   if (color) {
+                    //     track.image.color = color;
+                    //   }
+                    //   callback();
+                    // });
+                    callback();
                   });
 
                 },
