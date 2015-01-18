@@ -108,36 +108,32 @@ function fetchMetadataForUrl(url, req, mainCallback) {
             async.parallel([
 
                 async.series([
+                  // Get artist
                   function(callback) {
                     getArtistDetails(track, callback);
                   },
+                  // Get color based on above artist image
                   function(callback) {
                     getColor(track, callback);
                   }
                 ], function(err, results) {
-                  asyncCallback();
+                  asyncCallback(); // Artist and Image are complete
                 }),
 
-                // Track Details
+                // Get track Details
                 function(callback) {
                   if (track.song && track.artist) {
-                    lastfm.getTrackDetails(utils.sanitize(track.artist), utils.sanitize(track.song), function(error, trackDetails) {
-                      populateTrackObjectWithTrack(track, trackDetails);
-                      callback();
-                    });
+                    getTrackDetails(track, callback);
                   } else {
                     callback();
                   }
 
                 },
 
-                // Album details
+                // Get Album for track
                 function(callback) {
                   if (track.artist && track.song) {
-                    album.fetchAlbumForArtistAndTrack(track.artist, track.song, function(error, albumDetails) {
-                      track.album = albumDetails;
-                      callback();
-                    });
+                    getAlbumDetails(track, callback);
                   } else {
                     track.album = null;
                     callback();
@@ -147,15 +143,16 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
               ],
               function(err) {
-                asyncCallback();
+                asyncCallback(); // Track and Album details complete
               });
           } else {
-            asyncCallback();
+            asyncCallback(); // No track exists so track and album details could not take place
 
           }
         }
       ],
       function(err) {
+        // If no track was able to be created return an empty object
         if (!track) {
           track = createEmptyTrack();
         }
@@ -164,7 +161,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         utils.cacheData(streamCacheKey, track, 5);
 
         mainCallback(track);
-        //cleanup();
       });
   });
 
@@ -174,6 +170,20 @@ function getArtistDetails(track, callback) {
   lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
     populateTrackObjectWithArtist(track, artistDetails);
 
+    callback();
+  });
+}
+
+function getTrackDetails(track, callback) {
+  lastfm.getTrackDetails(utils.sanitize(track.artist), utils.sanitize(track.song), function(error, trackDetails) {
+    populateTrackObjectWithTrack(track, trackDetails);
+    callback();
+  });
+}
+
+function getAlbumDetails(track, callback) {
+  album.fetchAlbumForArtistAndTrack(track.artist, track.song, function(error, albumDetails) {
+    track.album = albumDetails;
     callback();
   });
 }
@@ -234,14 +244,9 @@ function populateTrackObjectWithTrack(track, apiData) {
       //track.artist = apiData.artist.name;
       track.album.image = apiData.album.image.last()["#text"];
       track.metaDataFetched = true;
-
-      // var releaseDate = moment(new Date(apiData.album.releaseDate)).format();
-      // track.album.releaseDate = releaseDate; //releaseDate.substr(0, releaseDate.length - 6);
     } catch (e) {
 
-    } finally {
-      //track.album = null;
-    }
+    } finally {}
 
   }
 
