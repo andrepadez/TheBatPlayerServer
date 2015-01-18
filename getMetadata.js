@@ -106,20 +106,31 @@ function fetchMetadataForUrl(url, req, mainCallback) {
           if (track) {
             async.parallel([
 
-                // Artist details
-                function(callback) {
-                  lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
-                    populateTrackObjectWithArtist(track, artistDetails);
-                    // utils.getColorForImage(track.image.url, function(color) {
-                    //   if (color) {
-                    //     track.image.color = color;
-                    //   }
-                    //   callback();
-                    // });
-                    callback();
-                  });
+                async.series([
+                  // Artist details
+                  function(callback) {
+                    lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
+                      populateTrackObjectWithArtist(track, artistDetails);
 
-                },
+                      callback();
+                    });
+
+                  },
+
+                  // Color
+                  function(callback) {
+                    if (track.image.url) {
+                      utils.getColorForImage(track.image.url, function(color) {
+                        if (color) {
+                          track.image.color = color;
+                        }
+                        callback();
+                      });
+                    } else {
+                      callback();
+                    }
+                  }
+                ]),
 
                 // Track Details
                 function(callback) {
