@@ -14,6 +14,10 @@ var discogs = new NC({
   accessSecret: "vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm"
 });
 
+var CA = require('coverart');
+var ca = new CA({
+  userAgent: 'TheBatPlayer ( http://thebatplayer.fm )'
+});
 
 S.extendPrototype();
 
@@ -80,7 +84,6 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       var encodedTrack = encodeURIComponent(trackName.trim());
 
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
-
       // console.log(url);
 
       request(url, function(error, response, body) {
@@ -99,8 +102,13 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             lastfm.getAlbumDetails(artistName, album.title, function(error, lastFmResult) {
               if (lastFmResult) {
                 var albumObject = createAlbumObjectFromResults(lastFmResult, album);
+                albumObject.mbid = album.id;
                 utils.cacheData(cacheKey, albumObject, 0);
-                callback(albumObject);
+                if (albumObject.image === '') {
+                  getAlbumArtFromDiscogs(albumObject, callback);
+                } else {
+                  callback(albumObject);
+                }
               } else {
                 console.log("All failed.  Fallback to LastFM.");
 
@@ -135,6 +143,22 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       });
     }
   });
+}
+
+function getAlbumArtFromDiscogs(albumObject, callback) {
+  if (albumObject.mbid !== '') {
+    ca.release(albumObject.mbid, {}, function(err, response) {
+      if (response.images.length > 0) {
+        var imageObject = response.images[0];
+        albumObject.image = imageObject.image;
+      }
+      callback(albumObject);
+      // console.log(response);
+    });
+
+  } else {
+    callback(albumObject);
+  }
 }
 
 function getAlbumsFromDiscogs(artistName, trackName, callback) {
@@ -193,8 +217,8 @@ function filterAlbums(albumsArray, artistName) {
 
     // Turn your strings into dates, and then subtract them
     // to get a value that is either negative, positive, or zero.
-    var aDate = Date(a.date);
-    var bDate = Date(b.date);
+    var aDate = Date(parseInt(a.date));
+    var bDate = Date(parseInt(b.date));
 
     // If there's no date then demote its sort order
     if (!a.date) {
