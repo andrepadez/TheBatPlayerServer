@@ -90,7 +90,6 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
         if (!error && response.statusCode == 200) {
           var jsonObject = JSON.parse(body);
-          utils.cacheData(cacheKey, jsonObject, 0);
 
           if (jsonObject.recordings.length > 0) {
 
@@ -107,6 +106,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
                 if (albumObject.image === '') {
                   getAlbumArtFromDiscogs(albumObject, callback);
                 } else {
+                  utils.cacheData(cacheKey, albumObject, 0);
                   callback(albumObject);
                 }
               } else {
@@ -117,6 +117,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
                   var albumObject = createAlbumObjectFromResults(albumResult, album);
 
                   console.log("Caching in fetchAlbumForArtistAndTrack");
+                  utils.cacheData(cacheKey, albumObject, 0);
                   callback(error, albumObject);
                 });
               }
@@ -135,6 +136,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
               // Return whatever we get from Last.FM instead.
               lastfm.usingLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
+                utils.cacheData(cacheKey, albumObject, 0);
                 callback(error, albumObject);
               });
             }
