@@ -123,8 +123,8 @@ function getColorForImage(url, callback) {
         callback(result);
       } else {
         imageColor.getColorForUrl(url, function(color) {
-          callback(color);
           cacheData(colorCacheKey, color, 0);
+          callback(color);
         });
       }
     });
