@@ -19,7 +19,7 @@ function getV1Title(url, callback) {
     }
   };
   var res = request(options, function(error, response, body) {
-    if (error) {
+    if (error || body === undefined) {
       console.log(error);
       callback(null);
     }
