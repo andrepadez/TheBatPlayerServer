@@ -38,13 +38,19 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
 }
 
 function createAlbumObject(title, imageUrl, releaseDate, mbid) {
-  var albumObject = {};
-  albumObject.name = title;
-  albumObject.image = imageUrl;
-  albumObject.released = releaseDate;
-  albumObject.mbid = mbid;
+  if (title !== null) {
+    var albumObject = {};
+    albumObject.name = title;
+    albumObject.image = imageUrl;
+    albumObject.released = releaseDate;
+    albumObject.mbid = mbid;
 
-  return albumObject;
+    return albumObject;
+  } else {
+    return null;
+  }
+
+
 }
 
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
@@ -60,7 +66,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       var encodedTrack = encodeURIComponent(trackName.trim());
 
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
-      console.log(url);
+      // console.log(url);
 
       request(url, function(error, response, body) {
 
@@ -80,7 +86,10 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
               // If album art is still empty use Discogs
               if (albumObject && albumObject.image === '') {
-                getAlbumArtFromDiscogs(albumObject, callback);
+                getAlbumArtFromDiscogs(albumObject, function(error, updatedAlbumObject) {
+                  albumObject = updatedAlbumObject;
+                  callback(error, albumObject);
+                });
               } else {
                 callback(error, albumObject);
               }
@@ -95,7 +104,6 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             if (!willRetry) {
               console.log("Giving up on MB and using Last.FM.");
               albumFromLastFM(artistName, trackName, function(error, albumResult) {
-                console.log(albumResult);
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
                 utils.cacheData(cacheKey, albumObject, 0);
                 callback(error, albumObject);
@@ -111,7 +119,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObject) {
   var albumObject = null;
 
-  if (lastFmAlbumResultObject) {
+  if (lastFmAlbumResultObject && lastFmAlbumResultObject.name) {
     var albumTitle = lastFmAlbumResultObject.name;
     var image = lastFmAlbumResultObject.image.last()["#text"];
     var releaseDate;
@@ -132,7 +140,6 @@ function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObje
 function albumFromLastFM(artistName, albumName, callback) {
   console.log("Using LastFM.");
   lastfm.getAlbumDetails(artistName, albumName, function(error, albumResult) {
-    // console.log(albumResult);
     callback(error, albumResult);
   });
 
@@ -158,15 +165,18 @@ function getAlbumArtFromDiscogs(albumObject, callback) {
 
   if (albumObject.mbid !== '') {
     ca.release(albumObject.mbid, {}, function(err, response) {
+
       if (response && response.images.length > 0) {
         var imageObject = response.images[0];
         albumObject.image = imageObject.image;
       }
       callback(err, albumObject);
+      console.log(albumObject);
     });
 
   } else {
     callback(null, albumObject);
+    console.log(albumObject);
   }
 }
 
