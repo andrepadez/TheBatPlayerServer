@@ -28,12 +28,12 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
   global.memcacheClient.get(streamFetchMethodCacheKey, function(error, result) {
     metadataSource = result;
-    // console.log("Cached metadata source: " + result);
+
 
     async.series([
 
         // Check for a cached version
-        function(asyncCallback) {
+        function(callback) {
           global.memcacheClient.get(streamCacheKey, function(error, result) {
             if (!error && result) {
               track = result;
@@ -41,13 +41,13 @@ function fetchMetadataForUrl(url, req, mainCallback) {
               return;
               // cleanup();
             } else {
-              asyncCallback();
+              callback();
             }
           });
         },
 
         // Get the title from Shoutcast v1 metadata
-        function(asyncCallback) {
+        function(callback) {
           if (track === null && (metadataSource != "SHOUTCAST_V2" && metadataSource != "STREAM")) {
             shoutcasttitle.getV1Title(url, function(data) {
               if (data) {
@@ -57,15 +57,15 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                   utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V1", fetchMethodCacheTime);
                 }
               }
-              asyncCallback();
+              callback();
             });
           } else {
-            asyncCallback();
+            callback();
           }
         },
 
         // Get the title from Shoutcast v2 metadata
-        function(asyncCallback) {
+        function(callback) {
           if (track === null && (metadataSource != "SHOUTCAST_V1" && metadataSource != "STREAM")) {
             shoutcasttitle.getV2Title(url, function(data) {
               if (data) {
@@ -76,16 +76,16 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 }
 
               }
-              asyncCallback();
+              callback();
             });
           } else {
-            asyncCallback();
+            callback();
           }
 
         },
 
         // Get the title from the station stream
-        function(asyncCallback) {
+        function(callback) {
           if (track === null && (metadataSource != "SHOUTCAST_V2" && "SHOUTCAST_V1")) {
             streamtitle.getTitle(url, function(title) {
               if (title) {
@@ -93,12 +93,11 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 track.station = {};
                 track.station.fetchsource = "STREAM";
                 utils.cacheData(streamFetchMethodCacheKey, "STREAM", fetchMethodCacheTime);
-
               }
-              asyncCallback();
+              callback();
             });
           } else {
-            asyncCallback();
+            callback();
           }
         },
 
@@ -106,19 +105,23 @@ function fetchMetadataForUrl(url, req, mainCallback) {
           if (track) {
 
             async.parallel([
+                function(callback) {
+                  async.series([ //Begin Artist / Color series
 
-                async.series([
-                  // Get artist
-                  function(callback) {
-                    getArtistDetails(track, callback);
-                  },
-                  // Get color based on above artist image
-                  function(callback) {
-                    getColor(track, callback);
-                  }
-                ], function(err, results) {
-                  asyncCallback(); // Artist and Image are complete
-                }),
+                    // Get artist
+                    function(callback) {
+                      getArtistDetails(track, callback);
+                    },
+
+                    // Get color based on above artist image
+                    function(callback) {
+                      getColor(track, callback);
+                    }
+
+                  ], function(err, results) {
+                    callback();
+                  }); // End Artist / Color series
+                },
 
                 // Get track Details
                 function(callback) {
@@ -135,6 +138,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                   if (track.artist && track.song) {
                     getAlbumDetails(track, function(albumObject) {
                       track.album = albumObject;
+                      callback();
                     });
                   } else {
                     track.album = null;
@@ -144,10 +148,11 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
 
               ],
-              function(err) {
+              function(err, results) {
                 asyncCallback(); // Track and Album details complete
               });
           } else {
+            console.log("No track exists.");
             asyncCallback(); // No track exists so track and album details could not take place
 
           }
@@ -171,7 +176,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 function getArtistDetails(track, callback) {
   lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
     populateTrackObjectWithArtist(track, artistDetails);
-
     callback();
   });
 }

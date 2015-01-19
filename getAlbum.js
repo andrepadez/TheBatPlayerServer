@@ -74,6 +74,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
           'User-Agent': config.useragent
         }
       };
+
       request(options, function(error, response, body) {
 
         if (!error && response.statusCode == 200) {
