@@ -68,7 +68,13 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
       // console.log(url);
 
-      request(url, function(error, response, body) {
+      var options = {
+        url: url,
+        headers: {
+          'User-Agent': config.useragent
+        }
+      };
+      request(options, function(error, response, body) {
 
         if (!error && response.statusCode == 200) {
           var jsonObject = JSON.parse(body);
