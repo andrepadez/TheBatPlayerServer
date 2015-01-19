@@ -110,6 +110,13 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
               });
             }
           }
+        } else {
+          console.log("Error with Musicbrainz.  Falling back to Last.FM");
+          albumFromLastFM(artistName, trackName, function(error, albumResult) {
+            var albumObject = createAlbumObjectFromResults(albumResult, null);
+            utils.cacheData(cacheKey, albumObject, 0);
+            callback(error, albumObject);
+          });
         }
       });
     }
