@@ -6,7 +6,7 @@ var async = require("async");
 var moment = require("moment");
 var album = require("./getAlbum.js");
 var md5 = require('MD5');
-var config = require("../config.js");
+var config = require("./config.js");
 
 var S = require('string');
 S.extendPrototype();
