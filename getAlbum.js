@@ -65,8 +65,8 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       var encodedArtist = encodeURIComponent(artistName.trim());
       var encodedTrack = encodeURIComponent(trackName.trim());
 
-      //var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
-      var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
+      var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
+      // var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
       console.log(url);
 
       var options = {
