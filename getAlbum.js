@@ -115,7 +115,9 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
               console.log("Giving up on MB and using Last.FM.");
               albumFromLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
-                albumObject.source = "LastFM";
+                if (albumObject) {
+                  albumObject.source = "LastFM";
+                }
                 utils.cacheData(cacheKey, albumObject, 0);
                 callback(error, albumObject);
               });
