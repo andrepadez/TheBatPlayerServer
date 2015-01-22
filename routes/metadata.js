@@ -7,11 +7,10 @@ module.exports = (function() {
   var router = express.Router();
 
   router.get("/:streamurl", function(req, res) {
-    var cacheAge = config.cachetime;
-
-    if (!res.getHeader('Cache-Control')) res.setHeader('Cache-Control', 'public, max-age=' + cacheAge);
-
     req.app.disable('etag');
+
+    var cacheAge = config.cachetime;
+    res.setHeader('Cache-Control', 'public, max-age=' + cacheAge);
 
     var url = req.params.streamurl;
     metadata.fetchMetadataForUrl(url, req, function(result) {
