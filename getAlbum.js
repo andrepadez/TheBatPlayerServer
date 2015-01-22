@@ -65,8 +65,9 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
       var encodedArtist = encodeURIComponent(artistName.trim());
       var encodedTrack = encodeURIComponent(trackName.trim());
 
-      var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
-      // console.log(url);
+      //var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
+      var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
+      console.log(url);
 
       var options = {
         url: url,
@@ -86,6 +87,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             albums = filterAlbums(albums, artistName);
             var album = albums.last();
             var albumObject = createAlbumObject(album.title, null, album.date, album.id);
+            albumObject.source = "Musicbrainz";
 
             // Fetch the album art from LastFM
             albumFromLastFM(artistName, album.title, function(error, albumResult) {
@@ -95,6 +97,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
               if (albumObject && albumObject.image === '') {
                 getAlbumArtFromDiscogs(albumObject, function(error, updatedAlbumObject) {
                   albumObject = updatedAlbumObject;
+                  albumObject.source = "Musicbrainz";
                   callback(error, albumObject);
                 });
               } else {
@@ -112,6 +115,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
               console.log("Giving up on MB and using Last.FM.");
               albumFromLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
+                albumObject.source = "LastFM";
                 utils.cacheData(cacheKey, albumObject, 0);
                 callback(error, albumObject);
               });
@@ -121,6 +125,9 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
           console.log("Error with Musicbrainz.  Falling back to Last.FM");
           albumFromLastFM(artistName, trackName, function(error, albumResult) {
             var albumObject = createAlbumObjectFromResults(albumResult, null);
+            if (albumObject) {
+              albumObject.source = "LastFM";
+            }
             utils.cacheData(cacheKey, albumObject, 0);
             callback(error, albumObject);
           });
