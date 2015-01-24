@@ -115,7 +115,14 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
                     // Get color based on above artist image
                     function(callback) {
-                      getColor(track, callback);
+                      getColor(track, function() {
+                        console.log();
+                        if (track.image.url) {
+                          var file = encodeURIComponent(track.image.url);
+                          track.image.url = "http://api.thebatplayer.fm:3000/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
+                        }
+                        callback();
+                      });
                     }
 
                   ], function(err, results) {
@@ -207,10 +214,10 @@ function getColor(track, callback) {
 
 }
 
-function createArtistImage(originalUrl) {
-  var url = "http://api.thebatplayer.fm/mp3info-dev/artistImage.php?url=" + encodeURIComponent(originalUrl);
-  utils.download(url, "./tmp/" + md5(url), null);
-}
+// function createArtistImage(originalUrl) {
+//   var url = "http://api.thebatplayer.fm/mp3info-dev/artistImage.php?url=" + encodeURIComponent(originalUrl);
+//   utils.download(url, "./tmp/" + md5(url), null);
+// }
 
 function createEmptyTrack() {
   var track = {};
@@ -229,7 +236,6 @@ function populateTrackObjectWithArtist(track, apiData) {
       track.isOnTour = parseInt(apiData.ontour);
       track.bio.text = bioText;
       track.bio.published = bioDate.year();
-
       track.tags = apiData.tags.tag.map(function(tagObject) {
         return tagObject.name;
       });

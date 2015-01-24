@@ -6,8 +6,10 @@ var timeout = require('connect-timeout');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 var Memcached = require('memcached');
+
 var routes = require('./routes/index');
 var metadata = require("./routes/metadata.js");
+var backgroundImage = require("./routes/background.js");
 
 var memcacheClient = null;
 setupMemcache();
@@ -29,6 +31,7 @@ app.use(bodyParser.urlencoded({
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/metadata", metadata);
+app.use("/background", backgroundImage);
 
 function setupMemcache() {
   if (memcacheClient === null) {

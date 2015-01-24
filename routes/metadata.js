@@ -1,5 +1,4 @@
 var express = require('express');
-var router = express.Router();
 var metadata = require("../getMetadata.js");
 var config = require("../config.js");
 

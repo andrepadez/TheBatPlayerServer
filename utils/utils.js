@@ -132,9 +132,17 @@ function getColorForImage(url, callback) {
     callback(null);
   }
 }
+
+function getCacheFilepathForUrl(url, type) {
+  var filename = md5(url);
+  var path = "./cache/" + type + "/" + filename;
+
+  return path;
+}
 module.exports.getColorForImage = getColorForImage;
 module.exports.createTrackFromTitle = createTrackFromTitle;
 module.exports.download = download;
 module.exports.sanitize = sanitize;
 module.exports.cacheData = cacheData;
 module.exports.fixTrackTitle = fixTrackTitle;
+module.exports.getCacheFilepathForUrl = getCacheFilepathForUrl;

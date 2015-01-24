@@ -11,7 +11,8 @@ var imagecolors = require('imagecolors');
 var ColorSpace = C.space.rgb['CIE-RGB'];
 
 function getColorForUrl(url, callback) {
-  var path = "./tmp/" + md5(url);
+  var path = utils.getCacheFilepathForUrl(url, "original");
+
   utils.download(url, path, function() {
 
     try {
