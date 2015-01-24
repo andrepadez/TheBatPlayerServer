@@ -1,5 +1,4 @@
-var gm = require('gm');
-var start = new Date();
+// var gm = require('gm');
 var exec = require('child_process').exec;
 var utils = require("../utils/utils.js");
 var fs = require('fs');
