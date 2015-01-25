@@ -9,7 +9,8 @@ var Memcached = require('memcached');
 
 var routes = require('./routes/index');
 var metadata = require("./routes/metadata.js");
-var backgroundImage = require("./routes/background.js");
+var backgroundImage = require("./routes/backgroundImage.js");
+var artistImage = require("./routes/artistImage.js");
 
 var memcacheClient = null;
 setupMemcache();
@@ -31,7 +32,8 @@ app.use(bodyParser.urlencoded({
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/metadata", metadata);
-app.use("/background", backgroundImage);
+app.use("/image/background", backgroundImage);
+app.use("/image/artist", artistImage);
 
 function setupMemcache() {
   if (memcacheClient === null) {
