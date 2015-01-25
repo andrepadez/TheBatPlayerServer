@@ -119,7 +119,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                         console.log();
                         if (track.image.url) {
                           var file = encodeURIComponent(track.image.url);
-                          track.image.url = "http://api.thebatplayer.fm:3000/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
+                          track.image.backgroundurl = "http://api.thebatplayer.fm:3000/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
                         }
                         callback();
                       });
