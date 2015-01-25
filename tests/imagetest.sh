@@ -1,0 +1,1 @@
+convert image.jpg -colorspace RGB \( -clone 0 -fill 'rgb(182,70,34)' -colorize 80% \) \( -clone 0 +dither -colors 2 -colorspace gray \) -compose blend -define compose:args=80x20 -composite -sigmoidal-contrast 20,60% -blur 2,1 test.jpg
