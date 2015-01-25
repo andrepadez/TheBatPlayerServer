@@ -32,8 +32,8 @@ app.use(bodyParser.urlencoded({
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use("/metadata", metadata);
-app.use("/image/background", backgroundImage);
-app.use("/image/artist", artistImage);
+app.use("/images/background", backgroundImage);
+app.use("/images/artist", artistImage);
 
 function setupMemcache() {
   if (memcacheClient === null) {
