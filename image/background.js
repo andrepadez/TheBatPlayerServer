@@ -15,7 +15,7 @@ function createBackground(url, colorObject, callback) {
     }
 
     utils.download(url, cacheFile, function() {
-      var command = "convert " + cacheFile + " +dither -colorspace gray -threshold 50% -normalize -sigmoidal-contrast 60,20% -fill \"rgb(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + ")\" -colorize 30% -blur 5 " + path;
+      var command = "convert " + cacheFile + " -colorspace RGB +dither -threshold 50% -normalize -sigmoidal-contrast 60,20% -fill \"rgb(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + ")\" -colorize 30% -blur 5 " + path;
       console.log(command);
 
       var child = exec(command, null, function(err, stdout, stderr) {
