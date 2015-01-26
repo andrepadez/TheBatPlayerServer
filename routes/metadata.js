@@ -1,5 +1,5 @@
 var express = require('express');
-var metadata = require("../getMetadata.js");
+var metadata = require("../modules/getMetadata.js");
 var config = require("../config.js");
 
 module.exports = (function() {

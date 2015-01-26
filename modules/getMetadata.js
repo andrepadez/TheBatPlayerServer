@@ -1,12 +1,12 @@
 var streamtitle = require("./streamTitle.js");
 var shoutcasttitle = require("./getTitleShoutcast.js");
-var utils = require("./utils/utils.js");
-var lastfm = require('./utils/lastfm.js');
+var utils = require("../utils/utils.js");
+var lastfm = require('../utils/lastfm.js');
 var async = require("async");
 var moment = require("moment");
 var album = require("./getAlbum.js");
 var md5 = require('MD5');
-var config = require("./config.js");
+var config = require("../config.js");
 
 var S = require('string');
 S.extendPrototype();
@@ -119,8 +119,8 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                         console.log();
                         if (track.image.url) {
                           var file = encodeURIComponent(track.image.url);
-                          track.image.backgroundurl = "http://api.thebatplayer.fm:3000/images/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
-                          track.image.url = "http://api.thebatplayer.fm:3000/images/artist/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
+                          track.image.backgroundurl = config.hostname + "/images/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
+                          track.image.url = config.hostname + "/images/artist/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
                         }
                         callback();
                       });
@@ -171,9 +171,9 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         if (!track) {
           track = createEmptyTrack();
         }
-        expires = Math.round(new Date().getTime() / 1000) + 5;
+        expires = Math.round(new Date().getTime() / 1000) + config.cachetime;
         track.expires = expires;
-        utils.cacheData(streamCacheKey, track, 5);
+        utils.cacheData(streamCacheKey, track, config.cachetime);
 
         mainCallback(track);
       });
@@ -215,11 +215,6 @@ function getColor(track, callback) {
 
 }
 
-// function createArtistImage(originalUrl) {
-//   var url = "http://api.thebatplayer.fm/mp3info-dev/artistImage.php?url=" + encodeURIComponent(originalUrl);
-//   utils.download(url, "./tmp/" + md5(url), null);
-// }
-
 function createEmptyTrack() {
   var track = {};
   return track;
@@ -232,7 +227,6 @@ function populateTrackObjectWithArtist(track, apiData) {
       var bioDate = moment(new Date(apiData.bio.published));
       var bioText = apiData.bio.summary.stripTags().trim().replace(/\n|\r/g, "");
 
-      //track.artist = apiData.name.trim();
       track.image.url = apiData.image.last()["#text"];
       track.isOnTour = parseInt(apiData.ontour);
       track.bio.text = bioText;
@@ -240,7 +234,6 @@ function populateTrackObjectWithArtist(track, apiData) {
       track.tags = apiData.tags.tag.map(function(tagObject) {
         return tagObject.name;
       });
-      //
       track.metaDataFetched = true;
     } catch (e) {
 
@@ -253,7 +246,6 @@ function populateTrackObjectWithTrack(track, apiData) {
   if (apiData) {
     try {
       track.album.name = apiData.album.title;
-      //track.artist = apiData.artist.name;
       track.album.image = apiData.album.image.last()["#text"];
       track.metaDataFetched = true;
     } catch (e) {

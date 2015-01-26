@@ -1,6 +1,6 @@
 var request = require('request');
 var urlparse = require('url');
-var utils = require("./utils/utils.js");
+var utils = require("../utils/utils.js");
 var S = require('string');
 S.extendPrototype();
 

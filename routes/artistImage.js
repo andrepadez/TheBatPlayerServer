@@ -16,7 +16,7 @@ module.exports = (function() {
     image.createArtistImage(url, colorObject, function(error, path) {
       fs.readFile(path, function(err, data) {
         res.writeHead(200, {
-          'Content-Type': 'image/jpeg'
+          'Content-Type': 'image/png'
         });
         res.end(data);
       });
