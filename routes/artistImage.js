@@ -13,7 +13,7 @@ module.exports = (function() {
       blue: req.params.blue
     };
 
-    image.createBackground(url, colorObject, function(error, path) {
+    image.createArtistImage(url, colorObject, function(error, path) {
       fs.readFile(path, function(err, data) {
         res.writeHead(200, {
           'Content-Type': 'image/jpeg'

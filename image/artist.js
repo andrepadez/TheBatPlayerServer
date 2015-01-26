@@ -5,7 +5,7 @@ var config = require("../config.js");
 
 function createArtistImage(url, colorObject, callback) {
 
-  var path = utils.getCacheFilepathForUrl(url, "backgrounds");
+  var path = utils.getCacheFilepathForUrl(url, "artists");
   var cacheFile = utils.getCacheFilepathForUrl(url, "original");
 
   fs.exists(path, function(exists) {
@@ -16,7 +16,7 @@ function createArtistImage(url, colorObject, callback) {
 
     utils.download(url, cacheFile, function() {
       var rgb = "'rgb\(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + "\)'";
-      var command = "convert " + cacheFile + " -colorspace RGB \\( -clone 0 -fill " + rgb + " -colorize 80% -auto-level \\) \\( -clone 0 -colorspace gray \\) -compose blend -define compose:args=80x20 -composite -resize 480x270\^ -gravity NorthWest -crop 480x270+0+40 -sigmoidal-contrast 3,50% -colors 5 -modulate 150,150 -normalize -median 5 -blur 2x2 " + path;
+      var command = "/bin/bash image/createArtistImage.sh " + cacheFile + " " + rgb + " " + path;
       console.log(command);
 
       var child = exec(command, null, function(err, stdout, stderr) {
