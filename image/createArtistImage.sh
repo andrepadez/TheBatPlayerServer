@@ -1,5 +1,6 @@
 #!/bin/bash
 # createArtistImage.sh originalImage.jpg "rgb(10,38,80)" outputImage.png
+
 convert $1 \
 -strip \
 -fill $2 -colorize 10,10,10 \

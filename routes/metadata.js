@@ -10,6 +10,7 @@ module.exports = (function() {
 
     var cacheAge = config.cachetime;
     res.setHeader('Cache-Control', 'public, max-age=' + cacheAge);
+    res.header("Content-Type", "application/json; charset=utf-8");
 
     var url = req.params.streamurl;
     metadata.fetchMetadataForUrl(url, req, function(result) {
