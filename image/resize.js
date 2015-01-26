@@ -15,12 +15,12 @@ function resizeImage(url, width, height, callback) {
     }
 
     utils.download(url, cacheFile, function() {
-      var rgb = "'rgb\(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + "\)'";
-      var command = "convert " + cacheFile + "-resize " + width + "x" + height + "^-gravity center " + path;
+      var size = width + "x" + height;
+      var command = "convert " + cacheFile + " -thumbnail " + size + " -gravity SouthEast -append ./image/resources/smallbat.png -strip -quality 95 -composite " + path;
       console.log(command);
 
       var child = exec(command, null, function(err, stdout, stderr) {
-        console.log("Complete");
+        console.log(stderr);
         callback(err, path);
       });
 

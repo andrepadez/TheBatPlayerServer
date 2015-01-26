@@ -7,8 +7,10 @@ module.exports = (function() {
 
   router.get("/:imageurl/:width/:height", function(req, res) {
     var url = req.params.imageurl;
+    var width = req.params.width;
+    var height = req.params.height;
 
-    image.createArtistImage(url, width, height, function(error, path) {
+    image.resizeImage(url, width, height, function(error, path) {
       fs.readFile(path, function(err, data) {
         res.writeHead(200, {
           'Content-Type': 'image/png'
