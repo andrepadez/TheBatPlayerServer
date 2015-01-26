@@ -5,4 +5,5 @@ convert $1 \
 \( +clone -alpha extract -virtual-pixel black \
 -spread 30 -blur 0x3 -threshold 50% -spread 10 -blur 10x5 \) \
 -alpha off -compose Copy_Opacity \
+-quality 8 \
 -composite png:$3
