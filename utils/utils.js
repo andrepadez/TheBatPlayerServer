@@ -5,6 +5,7 @@ var md5 = require('MD5');
 var spawn = require('child_process').spawn;
 var exec = require('child_process').exec;
 var config = require("../config.js");
+var path = require('path');
 
 function createTrackFromTitle(title) {
   titleArray = title.split(" - ");
@@ -135,7 +136,7 @@ function getColorForImage(url, callback) {
 
 function getCacheFilepathForUrl(url, type) {
   var filename = md5(url);
-  var path = "./cache/" + type + "/" + filename;
+  var path = __dirname + "/../cache/" + type + "/" + filename;
 
   return path;
 }
