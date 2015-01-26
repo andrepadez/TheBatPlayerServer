@@ -11,6 +11,7 @@ var routes = require('./routes/index');
 var metadata = require("./routes/metadata.js");
 var backgroundImage = require("./routes/backgroundImage.js");
 var artistImage = require("./routes/artistImage.js");
+var resizeImage = require("./routes/resizeImage.js");
 
 var memcacheClient = null;
 setupMemcache();
@@ -32,6 +33,7 @@ app.use(bodyParser.urlencoded({
 app.use("/metadata", metadata);
 app.use("/images/background", backgroundImage);
 app.use("/images/artist", artistImage);
+app.use("/images/resize", resizeImage);
 
 function setupMemcache() {
   if (memcacheClient === null) {
