@@ -7,8 +7,9 @@ module.exports = (function() {
 
   router.get("/", function(req, res) {
     var text = req.query.text;
+    var width = req.query.width;
 
-    image.createHeader(text, function(error, path) {
+    image.createHeader(text, width, function(error, path) {
       fs.readFile(path, function(err, data) {
         res.writeHead(200, {
           'Content-Type': 'image/png'
