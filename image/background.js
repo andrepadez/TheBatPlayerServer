@@ -16,7 +16,7 @@ function createBackground(url, colorObject, callback) {
 
     utils.download(url, cacheFile, function() {
       var rgb = "'rgb\(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + "\)'";
-      var command = "convert " + cacheFile + " -set colorspace RGB \\( -clone 0 -fill " + rgb + " -colorize 90% \\) \\( -clone 0 -colorspace gray \\) -compose blend -define compose:args=80x30 -composite -resize 480x270\^ -gravity center -crop 480x270+0+40 -colors 10 -median 2 -morphology Open Octagon -fill " + rgb + " -blur 4x1 -auto-level -colorize 10% " + path;
+      var command = "convert " + cacheFile + " -set colorspace RGB \\( -clone 0 -fill " + rgb + " -colorize 90% \\) \\( -clone 0 -colorspace gray \\) -compose blend -define compose:args=80x30 -composite -resize 480x270\^ -gravity center -crop 480x270+0+40 -colors 10 -median 2 -morphology Open Octagon -fill " + rgb + " -blur 4x1 -auto-level -colorize 13% " + path;
       console.log(command);
 
       var child = exec(command, null, function(err, stdout, stderr) {
