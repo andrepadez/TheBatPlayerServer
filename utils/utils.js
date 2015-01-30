@@ -60,15 +60,23 @@ function fixTrackTitle(trackString) {
 }
 
 function download(url, filename, callback) {
+  var tmpname = filename + "-tmp";
   fs.exists(filename, function(exists) {
     if (!exists) {
-      var wget = 'wget -O ' + filename + ' ' + url;
+      var wget = 'wget -O ' + tmpname + ' ' + url;
 
       var child = exec(wget, null, function(err, stdout, stderr) {
-        if (err) throw err;
-        else console.log(url + ' downloaded to ' + filename);
-        if (callback) {
-          callback();
+        if (err) {
+          throw err;
+        } else {
+          // Rename the file to the real filename
+          exec("mv " + tmpname + " " + filename, null, function(err, stdout, stderr) {
+            console.log(url + ' downloaded to ' + filename);
+            if (callback) {
+              callback();
+            }
+
+          });
         }
       });
     } else {
