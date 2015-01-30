@@ -2,8 +2,7 @@ var request = require('request');
 var fs = require('fs');
 var imageColor = require("./imageColor.js");
 var md5 = require('MD5');
-var spawn = require('child_process').spawn;
-var exec = require('child_process').exec;
+var child_process = require('child_process');
 var config = require("../config.js");
 var path = require('path');
 
@@ -62,17 +61,18 @@ function fixTrackTitle(trackString) {
 function download(url, filename, callback) {
   console.log(url + ' downloading to ' + filename);
 
-  var tmpname = filename + "-tmp";
   fs.exists(filename, function(exists) {
     if (!exists) {
-      var wget = 'wget -O ' + tmpname + ' ' + url;
 
-      var child = exec(wget, null, function(err, stdout, stderr) {
+      var tmpname = filename + "-tmp";
+      var wget = "wget -O " + tmpname + " " + url;
+
+      var child = child_process.exec(wget, null, function(err, stdout, stderr) {
         if (err) {
           throw err;
         } else {
           // Rename the file to the real filename
-          exec("mv " + tmpname + " " + filename, null, function(err, stdout, stderr) {
+          child_process.exec("mv " + tmpname + " " + filename, null, function(err, stdout, stderr) {
             if (callback) {
               callback();
             }
