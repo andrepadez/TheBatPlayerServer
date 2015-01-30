@@ -60,6 +60,8 @@ function fixTrackTitle(trackString) {
 }
 
 function download(url, filename, callback) {
+  console.log(url + ' downloading to ' + filename);
+
   var tmpname = filename + "-tmp";
   fs.exists(filename, function(exists) {
     if (!exists) {
@@ -71,7 +73,6 @@ function download(url, filename, callback) {
         } else {
           // Rename the file to the real filename
           exec("mv " + tmpname + " " + filename, null, function(err, stdout, stderr) {
-            console.log(url + ' downloaded to ' + filename);
             if (callback) {
               callback();
             }
