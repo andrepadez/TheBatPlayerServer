@@ -5,6 +5,8 @@ var config = require("../config.js");
 
 function createBackground(url, colorObject, callback) {
 
+  var failCounter = 0;
+
   var path = utils.getCacheFilepathForUrl(url, "backgrounds");
   var cacheFile = utils.getCacheFilepathForUrl(url, "original");
 
@@ -19,10 +21,25 @@ function createBackground(url, colorObject, callback) {
       var command = "convert " + cacheFile + " -colorspace gray -colorspace RGB -resize 480x270\^ -morphology Open Octagon -gravity center -crop 480x270+0+40 -median 8 -fill " + rgb + " -colorize 15% -auto-level -auto-gamma -brightness-contrast -30x27 " + path;
       console.log(command);
 
-      var child = exec(command, null, function(err, stdout, stderr) {
-        console.log("Complete");
-        callback(err, path);
-      });
+      var childCallback = function(err, stdout, stderr) {
+        if (!err && !stderr) {
+          console.log("Complete");
+          callback(null, path);
+        } else {
+          console.log("Error: " + stderr);
+          failCounter++;
+
+          if (failCounter < 4) {
+            exec(command, null, childCallback);
+          } else {
+            callback(err, null);
+          }
+
+        }
+      };
+
+
+      exec(command, null, childCallback);
 
     });
   });
