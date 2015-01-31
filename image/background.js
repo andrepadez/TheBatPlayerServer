@@ -19,7 +19,7 @@ function createBackground(url, colorObject, callback) {
     utils.download(url, cacheFile, function() {
 
       var rgb = "'rgb\(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + "\)'";
-      var command = "convert " + cacheFile + " -colorspace gray -colorspace RGB -resize 480x270\^ -morphology Open Octagon -gravity center -crop 480x270+0+40 -median 6 -fill " + rgb + " -colorize 30% -auto-level -auto-gamma -brightness-contrast -30x27 -strip " + path;
+      var command = "convert " + cacheFile + " -colorspace gray -colorspace RGB -resize 480x270\^ -morphology Open Octagon -gravity center -crop 480x270+0+40 -median 5 -fill " + rgb + " -auto-level -auto-gamma -colorize 25% -brightness-contrast -30x27 -sigmoidal-contrast 6x20% -strip " + path;
       console.log(command);
 
       var childCallback = function(err, stdout, stderr) {
