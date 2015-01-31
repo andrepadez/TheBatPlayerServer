@@ -10,8 +10,9 @@ var start = new Date();
 //var url = "http://userserve-ak.last.fm/serve/500/80847757/Bruderschaft+5911681563_c082f9b14d_z.jpg"; //Too blue
 //var url = "http://userserve-ak.last.fm/serve/_/100954947/Spiral+System.jpg" //dark
 //var url = "http://userserve-ak.last.fm/serve/500/197829/Lords+of+Acid+Violet.jpg"; // Dark purple
-var url = "http://userserve-ak.last.fm/serve/_/433759/Frozen+Plasma.jpg"; //Should return blue but returns pink
+//var url = "http://userserve-ak.last.fm/serve/_/433759/Frozen+Plasma.jpg"; //Should return blue but returns pink
 //var url = "http://userserve-ak.last.fm/serve/500/2535509/Nine+Inch+Nails+nin.jpg"; //Red but returns yellow
+var url = "http://userserve-ak.last.fm/serve/500/47816687/Miss+FD+missfdenterthevoidpressweb.jpg";
 
 var callback = function(colorObject) {
 
