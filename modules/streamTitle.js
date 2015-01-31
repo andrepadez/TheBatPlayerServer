@@ -2,7 +2,6 @@ var net = require('net');
 var fs = require('fs');
 var urlparse = require('url');
 
-
 var StreamTitle = function() {};
 
 StreamTitle.prototype.getTitle = function(url, parentCallback) {
