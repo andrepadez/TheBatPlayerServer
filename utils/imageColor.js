@@ -4,8 +4,8 @@ var md5 = require('MD5');
 var C = require('c0lor');
 var FlatColors = require("flatcolors");
 
-var ColorThief = require('color-thief');
-var colorThief = new ColorThief();
+//var ColorThief = require('color-thief');
+//var colorThief = new ColorThief();
 var imagecolors = require('imagecolors');
 
 var ColorSpace = C.space.rgb['CIE-RGB'];
