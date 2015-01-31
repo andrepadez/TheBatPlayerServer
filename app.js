@@ -1,6 +1,7 @@
-require('newrelic');
 var rollbar = require("rollbar");
 rollbar.init("41d47860da4546f89ca78845565ee85c");
+
+require('newrelic');
 
 var express = require('express');
 var app = express();
