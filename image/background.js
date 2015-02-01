@@ -30,13 +30,13 @@ function createBackground(url, colorObject, callback) {
           console.log("Error: " + stderr);
           failCounter++;
 
-          if (failCounter < 4) {
-            exec(command, null, childCallback);
-          } else {
-            callback(stderr, null);
-          }
-
+          // if (failCounter < 4) {
+          //   exec(command, null, childCallback);
+          // } else {
+          callback(stderr, cacheFile);
         }
+
+        // }
       };
 
 

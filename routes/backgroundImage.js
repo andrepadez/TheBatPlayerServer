@@ -15,12 +15,12 @@ module.exports = (function() {
 
     image.createBackground(url, colorObject, function(error, path) {
       fs.readFile(path, function(err, data) {
-        if (!err) {
+        if (path) {
           res.writeHead(200, {
             'Content-Type': 'image/jpeg'
           });
           res.end(data);
-        } else {
+        } else if (error) {
           res.status(500);
           res.end(error);
         }

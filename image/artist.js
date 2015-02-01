@@ -20,8 +20,12 @@ function createArtistImage(url, colorObject, callback) {
       console.log(command);
 
       var child = exec(command, null, function(err, stdout, stderr) {
-        console.log("Complete");
-        callback(stderr, path);
+        if (!err && !stderr) {
+          console.log("Complete");
+          callback(null, path);
+        } else {
+          callback(stderr, cacheFile);
+        }
       });
 
     });
