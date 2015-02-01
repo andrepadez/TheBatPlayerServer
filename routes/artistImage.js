@@ -14,12 +14,17 @@ module.exports = (function() {
     };
 
     image.createArtistImage(url, colorObject, function(error, path) {
-      fs.readFile(path, function(err, data) {
-        res.writeHead(200, {
-          'Content-Type': 'image/png'
+      if (!error) {
+        fs.readFile(path, function(err, data) {
+          res.writeHead(200, {
+            'Content-Type': 'image/png'
+          });
+          res.end(data);
         });
-        res.end(data);
-      });
+      } else {
+        res.status(500);
+        res.end(err);
+      }
     });
 
   });

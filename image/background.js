@@ -33,7 +33,7 @@ function createBackground(url, colorObject, callback) {
           if (failCounter < 4) {
             exec(command, null, childCallback);
           } else {
-            callback(err, null);
+            callback(stderr, null);
           }
 
         }

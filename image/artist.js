@@ -21,7 +21,7 @@ function createArtistImage(url, colorObject, callback) {
 
       var child = exec(command, null, function(err, stdout, stderr) {
         console.log("Complete");
-        callback(err, path);
+        callback(stderr, path);
       });
 
     });
