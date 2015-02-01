@@ -22,7 +22,7 @@ module.exports = (function() {
           res.end(data);
         } else {
           res.status(500);
-          res.end(err);
+          res.end(error);
         }
 
       });

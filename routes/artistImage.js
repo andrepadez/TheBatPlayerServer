@@ -23,7 +23,7 @@ module.exports = (function() {
         });
       } else {
         res.status(500);
-        res.end(err);
+        res.end(error);
       }
     });
 
