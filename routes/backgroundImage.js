@@ -14,21 +14,20 @@ module.exports = (function() {
     };
 
     image.createBackground(url, colorObject, function(error, path) {
-      fs.readFile(path, function(err, data) {
-        if (path) {
+      if (path) {
+
+        fs.readFile(path, function(err, data) {
           res.writeHead(200, {
             'Content-Type': 'image/jpeg'
           });
           res.end(data);
-        } else if (error) {
-          res.status(500);
-          res.end(error);
-        }
+        });
 
-      });
+      } else {
+        res.status(500);
+        res.end("There was an error creating background image.");
+      }
     });
-
   });
-
   return router;
 })();
