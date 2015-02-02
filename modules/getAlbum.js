@@ -54,7 +54,7 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
 }
 
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
-  console.log("*** getAlbumsFromMusicbrainz");
+  // console.log("*** getAlbumsFromMusicbrainz");
 
   var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
@@ -205,7 +205,7 @@ function getAlbumArtFromDiscogs(albumObject, callback) {
 
 function getAlbumsFromDiscogs(artistName, trackName, callback) {
   //https://api.discogs.com/database/search?type=release&artist=noisuf-x&track=noise+bouncing&key=wVixYWymHCBOxPnvBDuk&secret=vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm
-  console.log("*** getAlbumsFromDiscogs");
+  // console.log("*** getAlbumsFromDiscogs");
   var cacheKey = ("discogsAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {

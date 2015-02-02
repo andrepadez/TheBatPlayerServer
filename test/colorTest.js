@@ -1,10 +1,11 @@
+var expect = require("chai").expect;
+
 var utils = require("../utils/utils.js");
 var imageColor = require("../utils/imageColor.js");
 var backgroundImage = require("../image/background.js");
 var fs = require('fs');
 var md5 = require('MD5');
 
-var start = new Date();
 
 //var url = "http://userserve-ak.last.fm/serve/500/35850125/Kick+Bong+l_eb03469af44d49daa5dc2d1a4ca5.jpg"; //Dark
 //var url = "http://userserve-ak.last.fm/serve/500/80847757/Bruderschaft+5911681563_c082f9b14d_z.jpg"; //Too blue
@@ -14,17 +15,18 @@ var start = new Date();
 var url = "http://userserve-ak.last.fm/serve/500/2535509/Nine+Inch+Nails+nin.jpg"; //Red but returns yellow
 //var url = "http://userserve-ak.last.fm/serve/500/47816687/Miss+FD+missfdenterthevoidpressweb.jpg";
 
-var callback = function(colorObject) {
+describe("createBackground", function() {
+  it("Should create a background image from url and color", function(done) {
+    imageColor.getColorForUrl(url, function(colorObject) {
+      var path = "./tmp/" + md5(url);
+      backgroundImage.createBackground(url, colorObject.rgb, function(error, backgroundImagePath) {
 
-  var path = "./tmp/" + md5(url);
-  backgroundImage.createBackground(url, colorObject.rgb, function(error, backgroundImagePath) {
-    var end = new Date() - start;
-    console.info("Color Execution time: %dms", end);
+        var html = "<body bgcolor=" + colorObject.hex + "><img src=" + url + "><br><img src=" + backgroundImagePath + "></body>";
+        fs.writeFile("test/colorTest.html", html);
+        done();
+      });
 
-    var html = "<body bgcolor=" + colorObject.hex + "><img src=" + url + "><br><img src=" + backgroundImagePath + "></body>";
-    fs.writeFile("colorTest.html", html);
+    });
 
   });
-};
-
-imageColor.getColorForUrl(url, callback);
+});
