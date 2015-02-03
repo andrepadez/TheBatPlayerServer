@@ -1,4 +1,4 @@
-var utils = require("./utils.js");
+var utils = require("../utils/utils.js");
 var config = require("../config.js");
 
 var LastfmAPI = require('lastfmapi');

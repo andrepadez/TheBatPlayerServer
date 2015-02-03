@@ -2,7 +2,7 @@ var moment = require("moment");
 var request = require('request');
 var utils = require("../utils/utils.js");
 var Memcached = require('memcached');
-var lastfm = require("../utils/lastfm.js");
+var lastfm = require("./lastfm.js");
 var config = require("../config.js");
 var S = require('string');
 
