@@ -1,6 +1,7 @@
 var request = require('request');
 var urlparse = require('url');
 var utils = require("../utils/utils.js");
+var log = utils.log;
 var S = require('string');
 S.extendPrototype();
 
@@ -9,7 +10,7 @@ function getV1Title(url, callback) {
   var maxSize = 1000;
   var size = 0;
 
-  console.log("Fetching " + url);
+  log("Fetching " + url);
 
   var options = {
     url: url,
@@ -20,7 +21,7 @@ function getV1Title(url, callback) {
   };
   var res = request(options, function(error, response, body) {
     if (error || body === undefined) {
-      console.log(error);
+      log(error);
       callback(null);
       return;
     }
@@ -64,7 +65,7 @@ function getV2Title(url, callback) {
   var size = 0;
 
   var statsUrl = "http://" + url.hostname + ":" + port + "/stats?sid=1";
-  console.log("Fetching " + statsUrl);
+  log("Fetching " + statsUrl);
 
   var options = {
     url: statsUrl,

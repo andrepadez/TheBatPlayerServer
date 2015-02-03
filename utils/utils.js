@@ -5,6 +5,7 @@ var md5 = require('MD5');
 var child_process = require('child_process');
 var config = require("../config.js");
 var path = require('path');
+var rollbar = require('rollbar');
 
 function createTrackFromTitle(title) {
   titleArray = title.split(" - ");
@@ -59,7 +60,7 @@ function fixTrackTitle(trackString) {
 }
 
 function download(url, filename, callback) {
-  console.log(url + ' downloading to ' + filename);
+  log(url + ' downloading to ' + filename);
 
   fs.exists(filename, function(exists) {
     if (!exists) {
@@ -115,10 +116,10 @@ function sanitize(string) {
 
 function cacheData(key, value, lifetime) {
   if (config.enableCache && key && value) {
-    console.log("Caching: " + key);
+    log("Caching: " + key);
     memcacheClient.set(key, value, lifetime, function(err) {
       if (err) {
-        console.log(err);
+        log(err);
       }
     });
   }
@@ -149,6 +150,20 @@ function getCacheFilepathForUrl(url, type) {
 
   return path;
 }
+
+function log(text) {
+  var env = process.env.NODE_ENV;
+  rollbar.init('41d47860da4546f89ca78845565ee85c');
+
+  if (env === "development") {
+    console.log(text);
+  }
+
+  if (env === "production") {
+    rollbar.reportMessage(text);
+  }
+}
+module.exports.log = log;
 module.exports.getColorForImage = getColorForImage;
 module.exports.createTrackFromTitle = createTrackFromTitle;
 module.exports.download = download;

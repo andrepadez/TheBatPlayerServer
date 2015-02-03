@@ -6,9 +6,6 @@ var i = Math.floor(Math.random() * streams.length);
 
 var stream = streams[0];
 
-console.log("Getting title from: " + stream);
-
-
 describe("streamTitle", function() {
 
   it("Should return a title", function(done) {

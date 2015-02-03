@@ -2,6 +2,7 @@ var exec = require('child_process').exec;
 var utils = require("../utils/utils.js");
 var fs = require('fs');
 var config = require("../config.js");
+var log = utils.log;
 
 function createArtistImage(url, colorObject, callback) {
 
@@ -17,11 +18,10 @@ function createArtistImage(url, colorObject, callback) {
     utils.download(url, cacheFile, function() {
       var rgb = "'rgb\(" + colorObject.red + "," + colorObject.green + "," + colorObject.blue + "\)'";
       var command = "/bin/bash image/createArtistImage.sh " + cacheFile + " " + rgb + " " + path;
-      console.log(command);
+      log(command);
 
       var child = exec(command, null, function(err, stdout, stderr) {
         if (!err && !stderr) {
-          console.log("Complete");
           callback(null, path);
         } else {
           callback(stderr, cacheFile);

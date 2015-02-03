@@ -1,5 +1,6 @@
 var utils = require("../utils/utils.js");
 var config = require("../config.js");
+var log = utils.log;
 
 var LastfmAPI = require('lastfmapi');
 var lastfm = new LastfmAPI({
@@ -37,7 +38,7 @@ function getAlbumDetails(artistName, albumName, callback) {
         album: albumName,
         autocorrect: 1
       }, function(err, albumDetails) {
-        console.log("Fetched album from lastfm");
+        log("Fetched album from lastfm");
         utils.cacheData(cacheKey, albumDetails, 0);
         callback(err, albumDetails);
       });
@@ -60,12 +61,12 @@ function getTrackDetails(artistName, trackName, callback) {
           autocorrect: 1
         }, function(err, trackDetails) {
           track = trackDetails;
-          console.log("Fetched track from lastfm");
+          log("Fetched track from lastfm");
           utils.cacheData(cacheKey, trackDetails, 0);
         });
       } catch (e) {
-        console.log("*** Exception in getTrackDetails:");
-        console.log(e);
+        log("*** Exception in getTrackDetails:");
+        log(e);
       }
 
       callback(null, track);

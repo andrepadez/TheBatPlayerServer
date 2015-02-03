@@ -5,7 +5,7 @@ var Memcached = require('memcached');
 var lastfm = require("./lastfm.js");
 var config = require("../config.js");
 var S = require('string');
-
+var log = utils.log;
 var NC = require('nodecogs');
 var discogs = new NC({
   userAgent: config.useragent,
@@ -54,8 +54,7 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
 }
 
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
-  // console.log("*** getAlbumsFromMusicbrainz");
-
+  log("*** getAlbumsFromMusicbrainz");
   var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
   memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
@@ -67,7 +66,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
       var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=1";
       // var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
-      console.log(url);
+      log(url);
 
       var options = {
         url: url,
@@ -112,7 +111,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
 
             // Return whatever we get from Last.FM instead.
             if (!willRetry) {
-              console.log("Giving up on MB and using Last.FM.");
+              log("Giving up on MB and using Last.FM.");
               albumFromLastFM(artistName, trackName, function(error, albumResult) {
                 var albumObject = createAlbumObjectFromResults(albumResult, null);
                 if (albumObject) {
@@ -124,7 +123,7 @@ function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
             }
           }
         } else {
-          console.log("Error with Musicbrainz.  Falling back to Last.FM");
+          log("Error with Musicbrainz.  Falling back to Last.FM");
           albumFromLastFM(artistName, trackName, function(error, albumResult) {
             var albumObject = createAlbumObjectFromResults(albumResult, null);
             if (albumObject) {
@@ -161,7 +160,7 @@ function createAlbumObjectFromResults(lastFmAlbumResultObject, mbAlbumResultObje
 
 
 function albumFromLastFM(artistName, albumName, callback) {
-  console.log("Using LastFM.");
+  log("Using LastFM.");
   lastfm.getAlbumDetails(artistName, albumName, function(error, albumResult) {
     callback(error, albumResult);
   });
@@ -184,7 +183,7 @@ function retrySanitized(artistName, trackName, callback) {
 }
 
 function getAlbumArtFromDiscogs(albumObject, callback) {
-  console.log("Fetching album art from Discogs");
+  log("Fetching album art from Discogs");
 
   if (albumObject.mbid !== '') {
     ca.release(albumObject.mbid, {}, function(err, response) {
@@ -194,12 +193,10 @@ function getAlbumArtFromDiscogs(albumObject, callback) {
         albumObject.image = imageObject.image;
       }
       callback(err, albumObject);
-      console.log(albumObject);
     });
 
   } else {
     callback(null, albumObject);
-    console.log(albumObject);
   }
 }
 
@@ -237,7 +234,7 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
             }
           }
         } else {
-          console.log(err);
+          log(err);
           callback(null);
         }
       });

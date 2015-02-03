@@ -3,9 +3,8 @@ var fs = require('fs');
 var md5 = require('MD5');
 var C = require('c0lor');
 var FlatColors = require("flatcolors");
+var log = utils.log;
 
-//var ColorThief = require('color-thief');
-//var colorThief = new ColorThief();
 var imagecolors = require('imagecolors');
 
 var ColorSpace = C.space.rgb['CIE-RGB'];
@@ -30,7 +29,7 @@ function getColorForUrl(url, callback) {
       });
 
     } catch (e) {
-      console.log(e);
+      log(e);
     }
 
 

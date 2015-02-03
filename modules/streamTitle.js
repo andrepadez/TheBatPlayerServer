@@ -1,6 +1,8 @@
 var net = require('net');
 var fs = require('fs');
 var urlparse = require('url');
+var utils = require("../utils/utils.js");
+var log = utils.log;
 
 var StreamTitle = function() {};
 
@@ -15,7 +17,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
   } else {
     port = url.port;
   }
-  console.log("Connecting to stream " + url.hostname + " Port " + port);
+  log("Connecting to stream " + url.hostname + " Port " + port);
 
   client.connect(port, url.hostname, function() {
     // console.log("Connected to " + url.hostname);

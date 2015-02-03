@@ -1,6 +1,7 @@
 var streamtitle = require("./streamTitle.js");
 var shoutcasttitle = require("./getTitleShoutcast.js");
 var utils = require("../utils/utils.js");
+var log = utils.log;
 var lastfm = require('./lastfm.js');
 var async = require("async");
 var moment = require("moment");
@@ -116,7 +117,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                     // Get color based on above artist image
                     function(callback) {
                       getColor(track, function() {
-                        console.log();
                         if (track.image.url) {
                           var file = encodeURIComponent(track.image.url);
                           track.image.backgroundurl = config.hostname + "/images/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
@@ -160,7 +160,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 asyncCallback(); // Track and Album details complete
               });
           } else {
-            console.log("No track exists.");
             asyncCallback(); // No track exists so track and album details could not take place
 
           }
