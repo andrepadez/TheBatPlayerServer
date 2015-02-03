@@ -14,6 +14,7 @@ describe("createHeader", function() {
 
       fs.exists(path, function(exists) {
         expect(exists).to.equal(true);
+        fs.unlink(path);
         done();
       });
     });
