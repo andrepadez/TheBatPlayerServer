@@ -207,7 +207,6 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
   memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       callback(null, result);
-      console.log("Tests");
     } else {
 
       discogs.search({
@@ -223,7 +222,7 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
             var singleAlbum = response.results[0];
             var albumObject = createAlbumObject(singleAlbum.title, singleAlbum.thumb, singleAlbum.year, null);
             utils.cacheData(cacheKey, albumObject, 0);
-            callback(albumObject);
+            callback(err, albumObject);
           } else {
             var updatedArtist = utils.sanitize(artistName);
             var updatedTrack = utils.sanitize(trackName);
@@ -231,12 +230,12 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
               getAlbumsFromDiscogs(updatedArtist, updatedTrack, callback);
               return;
             } else {
-              callback(null);
+              callback(err, null);
             }
           }
         } else {
           log(err);
-          callback(null);
+          callback(err, null);
         }
       });
     }
