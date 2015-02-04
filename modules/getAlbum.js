@@ -207,6 +207,7 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
   memcacheClient.get(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       callback(null, result);
+      console.log("Tests");
     } else {
 
       discogs.search({
