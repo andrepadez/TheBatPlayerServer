@@ -9,7 +9,7 @@ var stream = streams[0];
 describe("streamTitle", function() {
 
   it("Should return a title", function(done) {
-    getStreamTitle.getTitle(stream, function(title) {
+    getStreamTitle.getTitle(stream, function(error, title) {
       expect(title).to.not.be.empty();
       expect(title).to.be.a('string');
       expect(title).to.contain(' - ');
