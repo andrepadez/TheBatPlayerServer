@@ -11,8 +11,19 @@ var config = require("../config.js");
 
 var S = require('string');
 S.extendPrototype();
+var validUrl = require('valid-url');
+
 
 function fetchMetadataForUrl(url, req, mainCallback) {
+
+  if (!validUrl.isUri(url)) {
+    var error = {};
+    error.message = "The URL " + url + " does not appear to be a valid URL.  Please verify it's a properly encoded URL.";
+    error.errorCode = 406;
+    error.batserver = config.useragent;
+    mainCallback(error, null);
+    return;
+  }
 
   var track = null;
   var fetchMethodCacheTime = 21600;
@@ -169,8 +180,8 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         // If no track was able to be created it's an error
         if (!track) {
           var error = {};
-          error.message = "No data was able to be fetched for your requested radio stream: " + decodeURIComponent(url) + ". Make sure your stream url is valid and encoded properly.";
-          error.errorCode = 404;
+          error.message = "No data was able to be fetched for your requested radio stream: " + decodeURIComponent(url) + ". Make sure your stream url is valid and encoded properly.  It's also possible the server just doesn't supply any metadata for us to provide you.";
+          error.errorCode = 400;
           error.batserver = config.useragent;
           mainCallback(error, null);
           return;
