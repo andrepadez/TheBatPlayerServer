@@ -115,7 +115,7 @@ function sanitize(string) {
 }
 
 function cacheData(key, value, lifetime) {
-  if (config.enableCache && key && value) {
+  if (config.enableCache && key && value && global.memcacheClient !== null) {
     log("Caching: " + key);
     global.memcacheClient.set(key, value, lifetime, function(err) {
       if (err) {
@@ -126,12 +126,12 @@ function cacheData(key, value, lifetime) {
 }
 
 function getCacheData(key, callback) {
-  if (!config.enableCache || !key) {
+  if (config.enableCache && key !== null && global.memcacheClient !== null) {
     global.memcacheClient.get(key, function(err, value) {
       if (err) {
         log(err);
       } else {
-        callback(value);
+        callback(null, value);
       }
     });
   } else {
