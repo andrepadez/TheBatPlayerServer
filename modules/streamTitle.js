@@ -7,9 +7,9 @@ var log = utils.log;
 var StreamTitle = function() {};
 
 StreamTitle.prototype.getTitle = function(url, parentCallback) {
-  // url = url + "/;";
   url = urlparse.parse(url);
   var client = new net.Socket();
+  client.setTimeout(2);
 
   var port;
   if (!url.port) {
@@ -17,12 +17,10 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
   } else {
     port = url.port;
   }
-  log("Connecting to stream " + url.hostname + " Port " + port);
+  log("Connecting to stream via socket " + url.hostname + " Port " + port);
 
   client.connect(port, url.hostname, function() {
-    // console.log("Connected to " + url.hostname);
     var str = "GET " + url.path + " HTTP/1.1\r\n\Icy-Metadata: 1\r\nUser-Agent: Winamp 2.8\r\nhost: " + url.hostname + "\r\n\r\n";
-    // console.log(str);
     client.write(str);
   });
 
@@ -33,22 +31,26 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
 
     str += response;
 
-    var needle = "StreamTitle=";
-    var position = str.indexOf(needle);
+    var substring = "StreamTitle=";
+    var position = str.indexOf(substring);
 
     if (position > -1) {
       client.destroy();
       var endPosition = str.toString().indexOf(";", position);
       var titleString = str.substring(position, endPosition);
       title = titleString.substring(13, titleString.length - 1);
-      // console.log("From stream: " + title);
-      parentCallback(title);
-
+      parentCallback(null, title);
     }
 
   };
 
+  errorCallback = function(error) {
+    client.destroy();
+    parentCallback(error, null);
+  };
+
   client.on('data', callback);
+  client.on('error', errorCallback);
 
 };
 
