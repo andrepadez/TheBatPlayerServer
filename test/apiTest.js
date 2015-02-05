@@ -36,20 +36,20 @@ describe('GET /metadata', function() {
   });
 });
 
-// Test making an invalid stream metadata API call
-// describe('GET /metadata', function() {
-//   it('respond with error', function(done) {
-//     request(app)
-//       .get('/metadata/http%3A%2F%2F225.264.141.34%3A6699')
-//       .set('Accept', 'application/json')
-//       .expect('Content-Type', /json/)
-//       .expect(404)
-//       .end(function(err, res) {
-//         if (err) throw err;
-//         done();
-//       });
-//   });
-// });
+//Test making an invalid stream metadata API call
+describe('GET /metadata', function() {
+  it('respond with error', function(done) {
+    request(app)
+      .get('/metadata/http%3A%2F%2F225.264.141.34%3A6699')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(404)
+      .end(function(err, res) {
+        if (err) throw err;
+        done();
+      });
+  });
+});
 
 // Test the background image creation API call
 describe('GET /images/background', function() {
