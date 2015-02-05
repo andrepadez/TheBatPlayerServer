@@ -21,13 +21,13 @@ function fetchMetadataForUrl(url, req, mainCallback) {
   var sourceStreamCacheKey = ("cache-source-stream-" + url).slugify();
   var metadataSource;
   var streamFetchMethodCacheKey = ("cache-stream-fetchmethod" + url).slugify();
-  global.memcacheClient = req.app.memcacheClient;
+  // global.memcacheClient = req.app.memcacheClient;
 
   if (url.endsWith("/;")) {
     url = url + "/;";
   }
 
-  global.memcacheClient.get(streamFetchMethodCacheKey, function(error, result) {
+  utils.getCacheData(streamFetchMethodCacheKey, function(error, result) {
     metadataSource = result;
 
 
@@ -35,7 +35,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 
         // Check for a cached version
         function(callback) {
-          global.memcacheClient.get(streamCacheKey, function(error, result) {
+          utils.getCacheData(streamCacheKey, function(error, result) {
             if (!error && result) {
               track = result;
               mainCallback(track);

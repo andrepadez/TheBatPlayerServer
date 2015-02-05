@@ -1,7 +1,6 @@
 var moment = require("moment");
 var request = require('request');
 var utils = require("../utils/utils.js");
-var Memcached = require('memcached');
 var lastfm = require("./lastfm.js");
 var config = require("../config.js");
 var S = require('string');
@@ -23,7 +22,7 @@ S.extendPrototype();
 function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
   var albumObjectCacheKey = ("cache-artist-" + artist + "track-" + track).slugify();
 
-  memcacheClient.get(albumObjectCacheKey, function(error, result) {
+  utils.getCacheData(albumObjectCacheKey, function(error, result) {
 
     if (!error && result !== undefined && config.enableCache) {
       mainCallback(null, result);
@@ -56,7 +55,7 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
 function getAlbumsFromMusicbrainz(artistName, trackName, callback) {
   log("*** getAlbumsFromMusicbrainz");
   var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
-  memcacheClient.get(cacheKey, function(error, result) {
+  utils.getCacheData(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       callback(error, result);
       return;
@@ -204,7 +203,7 @@ function getAlbumsFromDiscogs(artistName, trackName, callback) {
   //https://api.discogs.com/database/search?type=release&artist=noisuf-x&track=noise+bouncing&key=wVixYWymHCBOxPnvBDuk&secret=vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm
   // console.log("*** getAlbumsFromDiscogs");
   var cacheKey = ("discogsAlbum-track-" + trackName + "-" + artistName).slugify();
-  memcacheClient.get(cacheKey, function(error, result) {
+  utils.getCacheData(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       callback(null, result);
     } else {

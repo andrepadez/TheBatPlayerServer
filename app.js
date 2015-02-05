@@ -46,6 +46,7 @@ function setupMemcache() {
   if (memcacheClient === null) {
     app.memcacheClient = new Memcached();
     app.memcacheClient.connect("127.0.0.1:11211", function() {});
+    global.memcacheClient = app.memcacheClient;
   }
 }
 

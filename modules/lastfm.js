@@ -28,7 +28,7 @@ function getAlbumDetails(artistName, albumName, callback) {
 
   var cacheKey = ("cache-album-" + albumName + "-" + artistName).slugify();
 
-  global.memcacheClient.get(cacheKey, function(error, result) {
+  utils.getCacheData(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       // console.log("Fetched album from cache");
       callback(error, result);
@@ -49,7 +49,7 @@ function getAlbumDetails(artistName, albumName, callback) {
 function getTrackDetails(artistName, trackName, callback) {
   var cacheKey = ("cache-track-" + trackName + "-" + artistName).slugify();
 
-  global.memcacheClient.get(cacheKey, function(error, result) {
+  utils.getCacheData(cacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       callback(error, result);
     } else {
@@ -77,7 +77,7 @@ function getTrackDetails(artistName, trackName, callback) {
 function getArtistDetails(artistName, callback) {
   var artistCacheKey = ("cache-artist-" + artistName).slugify();
 
-  global.memcacheClient.get(artistCacheKey, function(error, result) {
+  utils.getCacheData(artistCacheKey, function(error, result) {
     if (!error && result !== undefined && config.enableCache) {
       callback(error, result);
     } else {

@@ -117,7 +117,7 @@ function sanitize(string) {
 function cacheData(key, value, lifetime) {
   if (config.enableCache && key && value) {
     log("Caching: " + key);
-    memcacheClient.set(key, value, lifetime, function(err) {
+    global.memcacheClient.set(key, value, lifetime, function(err) {
       if (err) {
         log(err);
       }
@@ -125,11 +125,25 @@ function cacheData(key, value, lifetime) {
   }
 }
 
+function getCacheData(key, callback) {
+  if (!config.enableCache || !key) {
+    global.memcacheClient.get(key, function(err, value) {
+      if (err) {
+        log(err);
+      } else {
+        callback(value);
+      }
+    });
+  } else {
+    callback(null, undefined);
+  }
+}
+
 function getColorForImage(url, callback) {
   if (url) {
     var colorCacheKey = ("cache-color-" + md5(url)).slugify();
 
-    global.memcacheClient.get(colorCacheKey, function(error, result) {
+    getCacheData(colorCacheKey, function(error, result) {
       if (!error && result !== undefined) {
         callback(result);
       } else {
@@ -163,6 +177,8 @@ function log(text) {
     rollbar.reportMessage(text);
   }
 }
+
+module.exports.getCacheData = getCacheData;
 module.exports.log = log;
 module.exports.getColorForImage = getColorForImage;
 module.exports.createTrackFromTitle = createTrackFromTitle;
