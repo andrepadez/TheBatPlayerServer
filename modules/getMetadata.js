@@ -38,7 +38,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
           utils.getCacheData(streamCacheKey, function(error, result) {
             if (!error && result) {
               track = result;
-              mainCallback(track);
+              mainCallback(error, track);
               return;
               // cleanup();
             } else {
@@ -88,7 +88,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         // Get the title from the station stream
         function(callback) {
           if (track === null && (metadataSource != "SHOUTCAST_V2" && "SHOUTCAST_V1")) {
-            streamtitle.getTitle(url, function(title) {
+            streamtitle.getTitle(url, function(error, title) {
               if (title) {
                 track = utils.createTrackFromTitle(title);
                 track.station = {};
@@ -166,15 +166,21 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         }
       ],
       function(err) {
-        // If no track was able to be created return an empty object
+        // If no track was able to be created it's an error
         if (!track) {
-          track = createEmptyTrack();
+          var error = {};
+          error.message = "No data was able to be fetched for your requested radio stream: " + decodeURIComponent(url) + ". Make sure your stream url is valid and encoded properly.";
+          error.errorCode = 404;
+          error.batserver = config.useragent;
+          mainCallback(error, null);
+          return;
         }
+
         expires = Math.round(new Date().getTime() / 1000) + config.cachetime;
         track.expires = expires;
         utils.cacheData(streamCacheKey, track, config.cachetime);
 
-        mainCallback(track);
+        mainCallback(null, track);
       });
   });
 

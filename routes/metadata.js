@@ -13,8 +13,13 @@ module.exports = (function() {
     res.header("Content-Type", "application/json; charset=utf-8");
 
     var url = req.params.streamurl;
-    metadata.fetchMetadataForUrl(url, req, function(result) {
-      res.json(result);
+    metadata.fetchMetadataForUrl(url, req, function(error, result) {
+      if (error) {
+        res.status(error.errorCode)
+          .json(error);
+      } else {
+        res.json(result);
+      }
     });
   });
 

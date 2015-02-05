@@ -15,7 +15,7 @@ var stream = streams[i];
 
 describe("getMetadata", function() {
   it("Should return an object", function(done) {
-    metadata.fetchMetadataForUrl(stream, req, function(result) {
+    metadata.fetchMetadataForUrl(stream, req, function(error, result) {
       expect(result).to.be.a("Object");
 
 
