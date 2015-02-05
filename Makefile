@@ -10,4 +10,16 @@ test-w:
 		--growl \
 		--watch
 
-.PHONY: test test-w
+dev:
+	@NODE_ENV=development node bin/www
+
+restart:
+	forever restartall
+
+start:
+	@NODE_ENV=production forever start bin/www
+
+stop:
+	 forever stopall
+
+.PHONY: test test-w dev restart start stop
