@@ -4,6 +4,7 @@
 convert $1 \
 -strip \
 -fill $2 -colorize 15% \
+-resize 500x330^ \
 \( +clone -alpha extract -virtual-pixel black \
 -spread 30 -blur 0x3 -threshold 50% -spread 6 -blur 10x5 \) \
 -alpha off -compose Copy_Opacity \
