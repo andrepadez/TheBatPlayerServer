@@ -82,8 +82,8 @@ function getColorFromColorArray(colors) {
 
   colors.sort(function(a, b) {
 
-    if (a.luminance = 0) {
-      console.log(a);
+    if (a.score.dark > 40) {
+      console.log(a.score.dark);
       console.log("Too dark");
       return -1;
     }
