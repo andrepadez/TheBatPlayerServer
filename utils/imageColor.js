@@ -6,6 +6,7 @@ var FlatColors = require("flatcolors");
 var log = utils.log;
 
 var imagecolors = require('imagecolors');
+var colormatch = require('colormatch');
 
 var ColorSpace = C.space.rgb['CIE-RGB'];
 
@@ -18,7 +19,7 @@ function getColorForUrl(url, callback) {
       // var image = fs.readFileSync(path);
 
       // var originalrgb = colorThief.getColor(image, 1);
-      imagecolors.extract(path, 10, function(err, colors) {
+      imagecolors.extract(path, 5, function(err, colors) {
 
         if (!err && colors.length > 0) {
           var colorObject = buildColorObjectFromColors(colors);
@@ -50,7 +51,7 @@ function buildColorObjectFromColors(colors) {
     xyz: null
   };
 
-  var rgb = FlatColors(color.rgb.r, color.rgb.g, color.rgb.b);
+  var rgb = [color.rgb.r, color.rgb.g, color.rgb.b];
   var originalRgb = [color.rgb.r, color.rgb.g, color.rgb.b];
 
   colorObject.rgb.red = originalRgb[0];
@@ -80,19 +81,34 @@ function buildColorObjectFromColors(colors) {
 function getColorFromColorArray(colors) {
 
   colors.sort(function(a, b) {
-    if (a.family == "dark") {
+
+    // console.log(a.family);
+
+    if (a.luminance < 0) {
+      // console.log("Too dark");
       return -1;
     }
 
     if (a.family == "white") {
+      // console.log("Too white");
       return -1;
     }
 
     if (a.family == "black") {
+      // console.log("Too black");
       return -1;
     }
 
-    if (a.percent < 10) {
+    var rgb = [a.rgb.r, a.rgb.g, a.rgb.b];
+    var skin = [229, 160, 115];
+    var isSkin = colormatch.quickMatch(rgb, skin);
+    if (isSkin) {
+      // console.log("Looks like skin color");
+      return -1;
+    }
+
+    if (a.percent < 3) {
+      // console.log("Not enough of this color.");
       return -1;
     }
 
@@ -101,22 +117,24 @@ function getColorFromColorArray(colors) {
     } else if (a.luminance == b.luminance) {
       return 0;
     } else {
+      // console.log("Not bright enough.");
       return -1;
     }
+
   });
 
 
   var index = 0;
-  var selectedColor = colors[index];
+  var selectedColor = colors[colors.length - 1];
 
   // If per chance we selected something we don't want then remedy that.
   while (selectedColor.family == "dark" || selectedColor.family == "black") {
     index++;
     if (index === colors.length - 1) {
-      return colors[3];
+      return colors[3]; // Fallback color
     }
   }
-  return colors[index];
+  return selectedColor;
 }
 
 if (!Array.prototype.last) {
