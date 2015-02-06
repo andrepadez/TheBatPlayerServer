@@ -12,9 +12,10 @@ var md5 = require('MD5');
 //var url = "http://userserve-ak.last.fm/serve/_/100954947/Spiral+System.jpg" //dark
 //var url = "http://userserve-ak.last.fm/serve/500/197829/Lords+of+Acid+Violet.jpg"; // Dark purple
 //var url = "http://userserve-ak.last.fm/serve/_/433759/Frozen+Plasma.jpg"; //Should return blue but returns pink
-var url = "http://userserve-ak.last.fm/serve/500/2535509/Nine+Inch+Nails+nin.jpg"; //Red but returns yellow
+//var url = "http://userserve-ak.last.fm/serve/500/2535509/Nine+Inch+Nails+nin.jpg"; //Red but returns yellow
 //var url = "http://userserve-ak.last.fm/serve/500/47816687/Miss+FD+missfdenterthevoidpressweb.jpg";
-//var url = "http://userserve-ak.last.fm/serve/_/69949826/Cesium137+1213ad5820.jpg"; // Blue but returns flesh color
+var url = "http://userserve-ak.last.fm/serve/_/69949826/Cesium137+1213ad5820.jpg"; // Blue but returns flesh color
+//var url = "http://userserve-ak.last.fm/serve/_/117427/SD6.jpg"; // Output not colorful enough
 
 describe("createBackground", function() {
   it("Should create a background image from url and color", function(done) {
