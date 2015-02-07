@@ -8,7 +8,7 @@ var stream = streams[0];
 
 describe("streamTitle", function() {
 
-  it("Should return a title", function(done) {
+  it("Should return a title from " + stream, function(done) {
     getStreamTitle.getTitle(stream, function(error, title) {
       expect(title).to.not.be.empty();
       expect(title).to.be.a('string');
