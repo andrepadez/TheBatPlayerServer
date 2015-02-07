@@ -28,7 +28,7 @@ async.each(urls, function(singleUrl, callback) {
 
       imageColor.getColorForUrl(singleUrl, function(colorObject) {
         backgroundImage.createBackground(singleUrl, colorObject.rgb, function(error, backgroundImagePath) {
-          html = html + "<div style=\"background-color:" + colorObject.hex + "\"><img src=" + singleUrl + "><img src=" + backgroundImagePath + "></div>";
+          html = html + "<div style=\"background-color:" + colorObject.hex + "\"><img src=" + singleUrl + "><img src=" + backgroundImagePath + "><br>" + JSON.stringify(colorObject) + "</div>";
           callback();
           done();
         });

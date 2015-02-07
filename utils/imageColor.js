@@ -82,6 +82,8 @@ function getColorFromColorArray(colors) {
 
   colors.sort(function(a, b) {
 
+    //console.log(a);
+
     if (a.score.dark > 40) {
       console.log(a.score.dark);
       console.log("Too dark");
@@ -89,12 +91,12 @@ function getColorFromColorArray(colors) {
     }
 
     if (a.family == "white") {
-      // console.log("Too white");
+      console.log("Too white");
       return -1;
     }
 
     if (a.family == "black") {
-      // console.log("Too black");
+      console.log("Too black");
       return -1;
     }
 
@@ -102,34 +104,27 @@ function getColorFromColorArray(colors) {
     var skin = [229, 160, 115];
     var isSkin = colormatch.quickMatch(rgb, skin);
     if (isSkin) {
-      // console.log("Looks like skin color");
+      console.log("Looks like skin color");
       return -1;
     }
 
-    if (a.percent < 3) {
-      // console.log("Not enough of this color.");
+    if (a.percent < 5) {
+      console.log("Not enough of this color.");
       return -1;
     }
 
-    if (a.luminance < b.luminance) {
-      return 1;
-    } else if (a.luminance == b.luminance) {
-      return 0;
-    } else {
-      // console.log("Not bright enough.");
-      return -1;
-    }
 
   });
 
 
   var index = 0;
-  var selectedColor = colors[colors.length - 1];
+  var selectedColor = colors[0];
 
   // If per chance we selected something we don't want then remedy that.
   while (selectedColor.family == "dark" || selectedColor.family == "black") {
     index++;
     if (index === colors.length - 1) {
+      console.log("Color selection failed.  Using fallback.");
       return colors[3]; // Fallback color
     }
   }
