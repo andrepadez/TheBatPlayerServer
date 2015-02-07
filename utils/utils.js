@@ -168,8 +168,7 @@ function getCacheFilepathForUrl(url, type) {
 function log(text) {
   var env = process.env.NODE_ENV;
 
-  if (env === "production") {
-  } else {
+  if (env === "production") {} else if (env === "development") {
     console.log(text);
   }
 }
