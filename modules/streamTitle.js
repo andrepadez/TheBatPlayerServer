@@ -10,6 +10,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
   url = urlparse.parse(url);
   var client = new net.Socket();
   client.setTimeout(2);
+  client.setEncoding('utf8');
 
   var port;
   if (!url.port) {
@@ -30,14 +31,14 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
     var title = null;
 
     str += response;
-
+    var decodedString = new Buffer(str).toString();
     var substring = "StreamTitle=";
-    var position = str.indexOf(substring);
+    var position = decodedString.indexOf(substring);
 
     if (position > -1) {
       client.destroy();
-      var endPosition = str.toString().indexOf(";", position);
-      var titleString = str.substring(position, endPosition);
+      var endPosition = decodedString.toString().indexOf(";", position);
+      var titleString = decodedString.substring(position, endPosition);
       title = titleString.substring(13, titleString.length - 1);
       parentCallback(null, title);
     }
