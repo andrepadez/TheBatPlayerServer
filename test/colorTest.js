@@ -19,7 +19,7 @@ urls.push("http://userserve-ak.last.fm/serve/_/69949826/Cesium137+1213ad5820.jpg
 urls.push("http://userserve-ak.last.fm/serve/_/117427/SD6.jpg"); // Output not colorful enough
 urls.push("http://userserve-ak.last.fm/serve/_/100584217/orifis+Dave+Levison.png"); // Unreadably dark color
 urls.push("http://userserve-ak.last.fm/serve/500/478622/Orange+Sector.jpg"); // Should be rust colored.  Comes out dark gray.
-
+urls.push("http://userserve-ak.last.fm/serve/500/22199291/Apoptygma+Berzerk+6.jpg"); //Should be white.  Comes out dark.
 var html = "";
 
 async.each(urls, function(singleUrl, callback) {
