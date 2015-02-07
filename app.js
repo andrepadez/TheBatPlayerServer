@@ -1,5 +1,9 @@
-var rollbar = require("rollbar");
-rollbar.handleUncaughtExceptions('41d47860da4546f89ca78845565ee85c');
+var env = process.env.NODE_ENV;
+
+if (env === "production") {
+  var rollbar = require("rollbar");
+  rollbar.handleUncaughtExceptions('41d47860da4546f89ca78845565ee85c');
+}
 
 require('newrelic');
 
@@ -40,7 +44,9 @@ app.use("/images/artist", artistImage);
 app.use("/images/resize", resizeImage);
 app.use("/images/header", headerImage);
 
-app.use(rollbar.errorHandler('41d47860da4546f89ca78845565ee85c'));
+if (env === "production") {
+  app.use(rollbar.errorHandler('41d47860da4546f89ca78845565ee85c'));
+}
 
 function setupMemcache() {
   if (memcacheClient === null) {
