@@ -174,7 +174,7 @@ function log(text) {
   }
 
   if (env === "production") {
-    rollbar.reportMessage(text);
+    //rollbar.reportMessage(text);
   }
 }
 
