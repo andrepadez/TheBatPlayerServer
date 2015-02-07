@@ -6,8 +6,15 @@ var child_process = require('child_process');
 var config = require("../config.js");
 var path = require('path');
 var rollbar = require('rollbar');
+var punycode = require("punycode");
 
 function createTrackFromTitle(title) {
+  try {
+    title = decodeURIComponent(escape(title));
+  } catch (e) {
+
+  }
+
   titleArray = title.split(" - ");
 
   var track = {
