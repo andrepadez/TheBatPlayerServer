@@ -167,14 +167,10 @@ function getCacheFilepathForUrl(url, type) {
 
 function log(text) {
   var env = process.env.NODE_ENV;
-  rollbar.init('41d47860da4546f89ca78845565ee85c');
-
-  if (env === "development") {
-    console.log(text);
-  }
 
   if (env === "production") {
-    //rollbar.reportMessage(text);
+  } else {
+    console.log(text);
   }
 }
 
