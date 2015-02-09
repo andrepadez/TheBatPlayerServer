@@ -7,13 +7,10 @@ var lastfm = new LastfmAPI({
   api_key: "62be1c8445c92c28e5b36f548c069f69"
 });
 
-function usingLastFM(artist, track, callback) {
-  // console.log("*** usingLastFM");
-
+function albumUsingLastFM(artist, track, callback) {
   getTrackDetails(artist, track, function(error, trackObject) {
     if (!error && trackObject && trackObject.album) {
-      var albumTitle = trackObject.album.title;
-      getAlbumDetails(artist, albumTitle, function(error, albumResult) {
+      getAlbumDetails(artist, trackObject.album.title, trackObject.album.title.mbid, function(error, albumResult) {
         callback(error, albumResult);
       });
     } else {
@@ -23,19 +20,42 @@ function usingLastFM(artist, track, callback) {
   });
 }
 
-function getAlbumDetails(artistName, albumName, callback) {
-  // console.log("*** getAlbumDetails");
+function getAlbumArt(albumName, artistName, mbid, callback) {
+  var cacheKey = ("cache-lastfmart-" + albumName + "-" + artistName).slugify();
+  utils.getCacheData(cacheKey, function(error, result) {
+    if (!error && result !== undefined) {
+      callback(error, result);
+    } else {
+      lastfm.album.getInfo({
+        album: albumName,
+        artist: artistName,
+        mbid: mbid,
+        autocorrect: 0
+      }, function(error, albumDetails) {
+        if (!error) {
+          var images = albumDetails.image;
+          var image = images[images.length - 2];
+          var url = image["#text"];
+          callback(error, url);
+        } else {
+          callback(error, null);
+        }
+      });
+    }
+  });
+}
 
+function getAlbumDetails(artistName, albumName, mbid, callback) {
   var cacheKey = ("cache-album-" + albumName + "-" + artistName).slugify();
 
   utils.getCacheData(cacheKey, function(error, result) {
-    if (!error && result !== undefined && config.enableCache) {
-      // console.log("Fetched album from cache");
+    if (!error && result !== undefined) {
       callback(error, result);
     } else {
       lastfm.album.getInfo({
         artist: artistName,
         album: albumName,
+        mbid: mbid,
         autocorrect: 1
       }, function(err, albumDetails) {
         log("Fetched album from lastfm");
@@ -48,28 +68,20 @@ function getAlbumDetails(artistName, albumName, callback) {
 
 function getTrackDetails(artistName, trackName, callback) {
   var cacheKey = ("cache-track-" + trackName + "-" + artistName).slugify();
-
   utils.getCacheData(cacheKey, function(error, result) {
-    if (!error && result !== undefined && config.enableCache) {
+    if (!error && result !== undefined) {
       callback(error, result);
     } else {
-      var track;
-      try {
-        lastfm.track.getInfo({
-          artist: artistName,
-          track: trackName,
-          autocorrect: 1
-        }, function(err, trackDetails) {
-          track = trackDetails;
-          log("Fetched track from lastfm");
-          utils.cacheData(cacheKey, trackDetails, 0);
-        });
-      } catch (e) {
-        log("*** Exception in getTrackDetails:");
-        log(e);
-      }
+      lastfm.track.getInfo({
+        artist: artistName,
+        track: trackName,
+        autocorrect: 1
+      }, function(err, trackDetails) {
+        log("Fetched track from lastfm");
+        utils.cacheData(cacheKey, trackDetails, 0);
+        callback(null, trackDetails);
+      });
 
-      callback(null, track);
     }
   });
 }
@@ -93,7 +105,8 @@ function getArtistDetails(artistName, callback) {
 
 }
 
+module.exports.getAlbumArt = getAlbumArt;
 module.exports.getArtistDetails = getArtistDetails;
 module.exports.getTrackDetails = getTrackDetails;
 module.exports.getAlbumDetails = getAlbumDetails;
-module.exports.usingLastFM = usingLastFM;
+module.exports.albumUsingLastFM = albumUsingLastFM;

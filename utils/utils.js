@@ -9,11 +9,6 @@ var rollbar = require('rollbar');
 var punycode = require("punycode");
 
 function createTrackFromTitle(title) {
-  try {
-    title = decodeURIComponent(escape(title));
-  } catch (e) {
-
-  }
 
   titleArray = title.split(" - ");
 
@@ -180,6 +175,17 @@ function log(text) {
   }
 }
 
+function trackSplit(str, separator, limit) {
+  str = str.split(separator);
+  if (str.length <= limit) return str;
+
+  var ret = str.splice(0, limit);
+  ret.push(str.join(separator));
+
+  return ret;
+}
+
+module.exports.trackSplit = trackSplit;
 module.exports.getCacheData = getCacheData;
 module.exports.log = log;
 module.exports.getColorForImage = getColorForImage;
