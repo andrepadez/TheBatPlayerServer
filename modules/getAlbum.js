@@ -63,7 +63,6 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
           if (!error && albumObject) {
             albumObject.source = "LastFM";
             album = albumObject;
-            utils.cacheData(cacheKey, albumObject, 0);
           }
           return callback();
         });
@@ -159,57 +158,48 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
 }
 
 function getAlbumFromMusicbrainz(artistName, trackName, callback) {
-  var cacheKey = ("musicbrainzAlbum-track-" + trackName + "-" + artistName).slugify();
-  utils.getCacheData(cacheKey, function(error, result) {
-    if (!error && result !== undefined && config.enableCache) {
-      callback(error, result);
-      return;
-    } else {
-      var encodedArtist = encodeURIComponent(artistName.trim());
-      var encodedTrack = encodeURIComponent(trackName.trim());
+  var encodedArtist = encodeURIComponent(artistName.trim());
+  var encodedTrack = encodeURIComponent(trackName.trim());
 
-      var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=10";
-      // var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
-      // console.log(url);
+  var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=10";
+  // var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
+  // console.log(url);
 
-      var options = {
-        url: url,
-        headers: {
-          'User-Agent': config.useragent
+  var options = {
+    url: url,
+    headers: {
+      'User-Agent': config.useragent
+    }
+  };
+
+  request(options, function(error, response, body) {
+
+    if (!error && response.statusCode == 200) {
+      var jsonObject = JSON.parse(body);
+
+      if (jsonObject.recordings.length > 0) {
+
+        var albums = jsonObject.recordings[0].releases;
+        var filteringObject = _.map(albums, function(result) {
+          var newObject = {};
+          newObject.name = result.title;
+          newObject.status = result.status;
+          newObject.date = result.date;
+          newObject.type = [result['release-group']['primary-type'], result['release-group']['secondary-types']];
+          newObject.artists = [artistName];
+          newObject.mbid = result.id;
+          return newObject;
+        });
+
+        var album = getAlbumFromAlbums(filteringObject);
+        if (album) {
+          var albumObject = createAlbumObject(album.name, null, album.date, album.mbid);
+          albumObject.source = "Musicbrainz";
+          callback(error, albumObject);
+        } else {
+          callback(null, null);
         }
-      };
-
-      request(options, function(error, response, body) {
-
-        if (!error && response.statusCode == 200) {
-          var jsonObject = JSON.parse(body);
-
-          if (jsonObject.recordings.length > 0) {
-
-            var albums = jsonObject.recordings[0].releases;
-            var filteringObject = _.map(albums, function(result) {
-              var newObject = {};
-              newObject.name = result.title;
-              newObject.status = result.status;
-              newObject.date = result.date;
-              newObject.type = [result['release-group']['primary-type'], result['release-group']['secondary-types']];
-              newObject.artists = [artistName];
-              newObject.mbid = result.id;
-              return newObject;
-            });
-
-            var album = getAlbumFromAlbums(filteringObject);
-            if (album) {
-              var albumObject = createAlbumObject(album.name, null, album.date, album.mbid);
-              albumObject.source = "Musicbrainz";
-              utils.cacheData(cacheKey, albumObject, 0);
-              callback(error, albumObject);
-            } else {
-              callback(null, null);
-            }
-          }
-        }
-      });
+      }
     }
   });
 }
@@ -243,54 +233,38 @@ function getAlbumArtFromDiscogsWithMBID(mbid, callback) {
 
 function getAlbumFromDiscogs(artistName, trackName, callback) {
 
-  var cacheKey = ("discogsAlbum-track-" + trackName + "-" + artistName).slugify();
-  utils.getCacheData(cacheKey, function(error, result) {
-    if (!error && result !== undefined && config.enableCache) {
-      callback(null, result);
+  discogs.search({
+    type: 'release',
+    artist: artistName,
+    track: trackName,
+    format: "album",
+    page: 0,
+    per_page: 10
+  }, function(err, response) {
+    if (!err) {
+      if (response.results.length > 0) {
+
+        // Create an object that can be used for filtering
+        var filteringObject = _.map(response.results, function(result) {
+          var newObject = {};
+          newObject.name = utils.trackSplit(result.title, " - ", 1).last();
+          newObject.date = result.year;
+          newObject.type = [result.type];
+          newObject.artists = [artistName];
+          newObject.mbid = null;
+          return newObject;
+        });
+
+        var album = getAlbumFromAlbums(filteringObject);
+        var albumObject = createAlbumObject(album.name, null, album.date, null);
+        albumObject.source = "Discogs";
+        callback(err, albumObject);
+      } else {
+        callback(err, null);
+      }
     } else {
-
-      discogs.search({
-        type: 'release',
-        artist: artistName,
-        track: trackName,
-        format: "album",
-        page: 0,
-        per_page: 10
-      }, function(err, response) {
-        if (!err) {
-          if (response.results.length > 0) {
-
-            // Create an object that can be used for filtering
-            var filteringObject = _.map(response.results, function(result) {
-              var newObject = {};
-              newObject.name = utils.trackSplit(result.title, " - ", 1).last();
-              newObject.date = result.year;
-              newObject.type = [result.type];
-              newObject.artists = [artistName];
-              newObject.mbid = null;
-              return newObject;
-            });
-
-            var album = getAlbumFromAlbums(filteringObject);
-            var albumObject = createAlbumObject(album.name, null, album.date, null);
-            albumObject.source = "Discogs";
-            utils.cacheData(cacheKey, albumObject, 0);
-            callback(err, albumObject);
-          } else {
-            var updatedArtist = utils.sanitize(artistName);
-            var updatedTrack = utils.sanitize(trackName);
-            if (updatedArtist != artistName || updatedTrack != trackName) {
-              getAlbumsFromDiscogs(updatedArtist, updatedTrack, callback);
-              return;
-            } else {
-              callback(err, null);
-            }
-          }
-        } else {
-          log(err);
-          callback(err, null);
-        }
-      });
+      log(err);
+      callback(err, null);
     }
   });
 }
