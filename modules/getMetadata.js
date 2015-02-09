@@ -133,12 +133,12 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                           track.image.backgroundurl = config.hostname + "/images/background/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
                           track.image.url = config.hostname + "/images/artist/" + file + "/" + track.image.color.rgb.red + "/" + track.image.color.rgb.green + "/" + track.image.color.rgb.blue;
                         }
-                        callback();
+                        return callback();
                       });
                     }
 
                   ], function(err, results) {
-                    callback();
+                    return callback();
                   }); // End Artist / Color series
                 },
 
@@ -147,7 +147,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                   if (track.song && track.artist) {
                     getTrackDetails(track, callback);
                   } else {
-                    callback();
+                    return callback();
                   }
 
                 },
@@ -157,21 +157,21 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                   if (track.artist && track.song) {
                     getAlbumDetails(track, function(albumObject) {
                       track.album = albumObject;
-                      callback();
+                      return callback();
                     });
                   } else {
                     track.album = null;
-                    callback();
+                    return callback();
                   }
                 }
 
 
               ],
               function(err, results) {
-                asyncCallback(); // Track and Album details complete
+                return asyncCallback(); // Track and Album details complete
               });
           } else {
-            asyncCallback(); // No track exists so track and album details could not take place
+            return asyncCallback(); // No track exists so track and album details could not take place
 
           }
         }
@@ -183,15 +183,14 @@ function fetchMetadataForUrl(url, req, mainCallback) {
           error.message = "No data was able to be fetched for your requested radio stream: " + decodeURIComponent(url) + ". Make sure your stream url is valid and encoded properly.  It's also possible the server just doesn't supply any metadata for us to provide you.";
           error.errorCode = 400;
           error.batserver = config.useragent;
-          mainCallback(error, null);
-          return;
+          return mainCallback(error, null);
         }
 
         expires = Math.round(new Date().getTime() / 1000) + config.cachetime;
         track.expires = expires;
         utils.cacheData(streamCacheKey, track, config.cachetime);
 
-        mainCallback(null, track);
+        return mainCallback(null, track);
       });
   });
 

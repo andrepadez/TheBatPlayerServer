@@ -123,6 +123,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
       }
     }
 
+    utils.cacheData(albumObjectCacheKey, album, 0);
     return mainCallback(error, album);
   });
 }
