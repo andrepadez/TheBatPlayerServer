@@ -11,6 +11,7 @@ module.exports = (function() {
     var height = req.params.height;
 
     image.resizeImage(url, width, height, function(error, path) {
+      res.setHeader('Cache-Control', 'public, max-age=31557600'); // one year
       fs.readFile(path, function(err, data) {
         res.writeHead(200, {
           'Content-Type': 'image/png'
