@@ -23,7 +23,7 @@ var ca = new CA({
 S.extendPrototype();
 
 function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
-  var albumObjectCacheKey = ("cache-artist-" + artist + "track-" + track).slugify();
+  var albumObjectCacheKey = ("cache-artist-" + artist + "-track-" + track).slugify();
   var album = null;
 
   async.series([
@@ -34,7 +34,8 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
 
         if (!error && albumResult !== undefined && config.enableCache) {
           album = albumResult;
-          return callback();
+          // callback();
+          return mainCallback(null, albumResult);
         }
         return callback();
       });
@@ -56,12 +57,12 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
       }
     },
 
-    // Try Last.FM
+    // Try musicbrainz
     function(callback) {
       if (!album) {
-        albumFromLastFM(artist, track, function(error, albumObject) {
+        getAlbumFromMusicbrainz(artist, track, function(error, albumObject) {
           if (!error && albumObject) {
-            albumObject.source = "LastFM";
+            albumObject.source = "Musicbrainz";
             album = albumObject;
           }
           return callback();
@@ -71,12 +72,12 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
       }
     },
 
-    // Try musicbrainz
+    // Try Last.FM
     function(callback) {
       if (!album) {
-        getAlbumFromMusicbrainz(artist, track, function(error, albumObject) {
+        albumFromLastFM(artist, track, function(error, albumObject) {
           if (!error && albumObject) {
-            albumObject.source = "Musicbrainz";
+            albumObject.source = "LastFM";
             album = albumObject;
           }
           return callback();
@@ -185,7 +186,8 @@ function getAlbumFromMusicbrainz(artistName, trackName, callback) {
           var newObject = {};
           newObject.name = result.title;
           newObject.status = result.status;
-          newObject.date = result.date;
+          newObject.date = moment(new Date(result.date).year());
+
           newObject.type = [result['release-group']['primary-type'], result['release-group']['secondary-types']];
           newObject.artists = [artistName];
           newObject.mbid = result.id;
@@ -208,7 +210,10 @@ function getAlbumFromMusicbrainz(artistName, trackName, callback) {
 function albumFromLastFM(artistName, trackName, callback) {
   lastfm.albumUsingLastFM(artistName, trackName, function(error, albumResult) {
     if (!error && albumResult) {
-      var releaseDate = moment(new Date(albumResult.releasedate.trim())).year();
+      var releaseDate = null;
+      if (albumResult.releasedate) {
+        releaseDate = moment(new Date(albumResult.releasedate.trim())).year();
+      }
       var albumObject = createAlbumObject(albumResult.name, albumResult.image.last()['#text'], releaseDate, albumResult.mbid);
       callback(error, albumObject);
     } else {
@@ -302,8 +307,13 @@ function getAlbumFromAlbums(albumsArray) {
       return -1;
     }
 
-    // If it's a live album demote it
+    // If it's a Single demote it
     if (_.includes(a.type, "Single")) {
+      return -1;
+    }
+
+    // If it's a EP demote it
+    if (_.includes(a.type, "EP")) {
       return -1;
     }
 
@@ -320,11 +330,11 @@ function getAlbumFromAlbums(albumsArray) {
     }
   }
 
-  if (updatedAlbums.length === 0 && albumsArray.length > 0) {
-    updatedAlbums = albumsArray;
+  if (updatedAlbums.length > 0) {
+    return updatedAlbums.last();
+  } else {
+    return null;
   }
-
-  return updatedAlbums.last();
 
 }
 

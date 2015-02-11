@@ -10,7 +10,7 @@ var punycode = require("punycode");
 
 function createTrackFromTitle(title) {
 
-  titleArray = title.split(" - ");
+  titleArray = trackSplit(title, " - ", 1);
 
   var track = {
     artist: titleArray[0],
@@ -77,7 +77,7 @@ function download(url, filename, callback) {
           // Rename the file to the real filename
           child_process.exec("mv " + tmpname + " " + filename, null, function(err, stdout, stderr) {
             if (callback) {
-              callback();
+              return callback();
             }
 
           });
@@ -85,7 +85,7 @@ function download(url, filename, callback) {
       });
     } else {
       if (callback) {
-        callback();
+        return callback();
       }
     }
   });
@@ -133,11 +133,11 @@ function getCacheData(key, callback) {
       if (err) {
         log(err);
       } else {
-        callback(null, value);
+        return callback(null, value);
       }
     });
   } else {
-    callback(null, undefined);
+    return callback(null, undefined);
   }
 }
 
@@ -147,7 +147,7 @@ function getColorForImage(url, callback) {
 
     getCacheData(colorCacheKey, function(error, result) {
       if (!error && result !== undefined) {
-        callback(result);
+        return callback(result);
       } else {
         imageColor.getColorForUrl(url, function(color) {
           cacheData(colorCacheKey, color, 0);
@@ -156,7 +156,7 @@ function getColorForImage(url, callback) {
       }
     });
   } else {
-    callback(null);
+    return callback(null);
   }
 }
 

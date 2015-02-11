@@ -30,7 +30,7 @@ function getAlbumArt(albumName, artistName, mbid, callback) {
         album: albumName,
         artist: artistName,
         mbid: mbid,
-        autocorrect: 0
+        autocorrect: 1
       }, function(error, albumDetails) {
         if (!error) {
           var images = albumDetails.image;

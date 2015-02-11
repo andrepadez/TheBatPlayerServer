@@ -11,11 +11,15 @@ var album = require("../modules/getAlbum.js");
 // var track = "Situations Like These (single version)";
 
 var tracks = [];
-tracks.push({
-  artist: "The Prodigy",
-  track: "Breathe"
-});
+// tracks.push({
+//   artist: "The Prodigy",
+//   track: "Breathe"
+// });
 
+tracks.push({
+  artist: "Escape With Romeo",
+  track: "It's Loneliness"
+});
 
 async.each(tracks, function(singleTrack, callback) {
   // album.fetchAlbumForArtistAndTrack(singleTrack.artist, singleTrack.track, function(error, albumObject) {
