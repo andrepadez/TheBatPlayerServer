@@ -35,6 +35,7 @@
     "rollbar": "^0.4.4",
     "supertest": "^0.15.0",
     "valid-url": "^1.0.9",
-    "colormatch": "0.0.4"
+    "colormatch": "0.0.4",
+    "compression": "^1.4.0"
   }
 }

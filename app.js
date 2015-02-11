@@ -9,6 +9,7 @@ require('newrelic');
 
 var express = require('express');
 var app = express();
+var compress = require('compression');
 var timeout = require('connect-timeout');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
@@ -27,6 +28,7 @@ setupMemcache();
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
+app.use(compress());
 app.set('view engine', 'jade');
 app.use(timeout('10s'));
 
