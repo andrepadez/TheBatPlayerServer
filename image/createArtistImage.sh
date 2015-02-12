@@ -2,6 +2,7 @@
 # createArtistImage.sh originalImage.jpg "rgb(10,38,80)" outputImage.png
 
 convert $1 \
+-depth 8 \
 -strip \
 -fill $2 -colorize 13% \
 -resize 500x330^ \
