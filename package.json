@@ -36,6 +36,7 @@
     "supertest": "^0.15.0",
     "valid-url": "^1.0.9",
     "colormatch": "0.0.4",
-    "compression": "^1.4.0"
+    "compression": "^1.4.0",
+    "asciify-string": "^0.1.1"
   }
 }
