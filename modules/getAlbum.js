@@ -186,7 +186,9 @@ function getAlbumFromMusicbrainz(artistName, trackName, callback) {
           var newObject = {};
           newObject.name = result.title;
           newObject.status = result.status;
-          newObject.date = moment(new Date(result.date).year());
+          if (result.date) {
+            newObject.date = moment(new Date(result.date)).year();
+          }
 
           newObject.type = [result['release-group']['primary-type'], result['release-group']['secondary-types']];
           newObject.artists = [artistName];
@@ -275,8 +277,6 @@ function getAlbumFromDiscogs(artistName, trackName, callback) {
   });
 }
 
-// Utilities
-
 
 function getAlbumFromAlbums(albumsArray) {
   // If there's only one then don't go through the below work.
@@ -284,16 +284,14 @@ function getAlbumFromAlbums(albumsArray) {
     return albumsArray[0];
   }
 
-  albumsArray = albumsArray.sort(function(a, b) {
+  albumsArray.sort(function(a, b) {
 
     // Turn your strings into dates, and then subtract them
     // to get a value that is either negative, positive, or zero.
-    var aDate = Date(parseInt(a.date));
-    var bDate = Date(parseInt(b.date));
-
-    // If there's no date then demote its sort order
-    if (!a.date) {
-      return -1;
+    if (a.date && b.date) {
+      var aDate = Date(parseInt(a.date));
+      var bDate = Date(parseInt(b.date));
+      return aDate - bDate;
     }
 
 
@@ -301,11 +299,18 @@ function getAlbumFromAlbums(albumsArray) {
     if (a.artists.length > b.artists.length) {
       return -1;
     }
+    if (a.artists.length < b.artists.length) {
+      return 1;
+    }
 
     // If it has a secondary album type then demote it
-    if (a.type.length > 1) {
+    if (a.type.length === 1 && b.type.length > 1) {
+      return 1;
+    }
+    if (a.type.length > 1 && b.type.length === 1) {
       return -1;
     }
+
 
     // If it's a Single demote it
     if (_.includes(a.type, "Single")) {
@@ -317,7 +322,8 @@ function getAlbumFromAlbums(albumsArray) {
       return -1;
     }
 
-    return aDate - bDate;
+    return 0;
+
   });
 
   var updatedAlbums = [];
@@ -331,7 +337,7 @@ function getAlbumFromAlbums(albumsArray) {
   }
 
   if (updatedAlbums.length > 0) {
-    return updatedAlbums.last();
+    return updatedAlbums[0];
   } else {
     return null;
   }

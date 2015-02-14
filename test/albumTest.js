@@ -11,14 +11,15 @@ var album = require("../modules/getAlbum.js");
 // var track = "Situations Like These (single version)";
 
 var tracks = [];
-// tracks.push({
-//   artist: "The Prodigy",
-//   track: "Breathe"
-// });
-
 tracks.push({
-  artist: "Escape With Romeo",
-  track: "It's Loneliness"
+  artist: "The Prodigy",
+  track: "Breathe",
+  album: "The Fat of the land"
+});
+tracks.push({
+  artist: "Aesthetic Perfection",
+  track: "The Dark Half",
+  album: "'Til Death"
 });
 
 async.each(tracks, function(singleTrack, callback) {
@@ -36,7 +37,9 @@ async.each(tracks, function(singleTrack, callback) {
         expect(albumObject).to.have.property('image');
         expect(albumObject).to.have.property('released');
         expect(albumObject).to.have.property('mbid');
+        expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
         done();
+        // callback();
       });
 
     });
@@ -53,9 +56,8 @@ async.each(tracks, function(singleTrack, callback) {
         expect(albumObject).to.have.property('image');
         expect(albumObject).to.have.property('released');
         expect(albumObject).to.have.property('mbid');
-
+        expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
         done();
-        callback();
       });
 
     });
@@ -72,6 +74,7 @@ async.each(tracks, function(singleTrack, callback) {
         expect(albumObject).to.have.property('image');
         expect(albumObject).to.have.property('released');
         expect(albumObject).to.have.property('mbid');
+        expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
         done();
       });
     });

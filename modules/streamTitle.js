@@ -21,7 +21,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
   log("Connecting to stream via socket " + url.hostname + " Port " + port);
 
   client.connect(port, url.hostname, function() {
-    var str = "GET " + url.path + " HTTP/1.1\r\n\Icy-Metadata: 1\r\nUser-Agent: Winamp 2.8\r\nhost: " + url.hostname + "\r\n\r\n";
+    var str = "GET " + url.path + " HTTP/1.0\r\n\Icy-Metadata: 1\r\nUser-Agent: Winamp 2.8\r\nhost: " + url.hostname + ":" + port + "\r\n\r\n";
     client.write(str);
   });
 
@@ -32,6 +32,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
 
     str += response;
     var decodedString = new Buffer(str).toString();
+    console.log(decodedString);
     var substring = "StreamTitle=";
     var position = decodedString.indexOf(substring);
 
