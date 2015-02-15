@@ -7,7 +7,7 @@ convert $1 \
 -fill $2 -colorize 13% \
 -resize 500x330^ \
 \( +clone -alpha extract -virtual-pixel black \
--spread 50 -blur 0x3 -threshold 50% \) \
+-spread 40 -blur 0x3 -threshold 50% \) \
 -alpha off -compose Copy_Opacity \
 -depth 8 \
 -composite \
