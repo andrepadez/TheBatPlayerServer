@@ -1,14 +1,11 @@
 var utils = require('./utils.js');
 var fs = require('fs');
 var md5 = require('MD5');
-var C = require('c0lor');
-var FlatColors = require("flatcolors");
 var log = utils.log;
 
 var imagecolors = require('imagecolors');
 var colormatch = require('colormatch');
 
-var ColorSpace = C.space.rgb['CIE-RGB'];
 
 function getColorForUrl(url, callback) {
   var path = utils.getCacheFilepathForUrl(url, "original");
