@@ -91,7 +91,8 @@ function getColorFromColorArray(colors, mainCallback) {
       return callback(true);
 
     }, function(updatedColors) {
-      mainCallback(updatedColors[0]);
+      var color = updatedColors[0] || colors[3];
+      mainCallback(color);
     });
 
   });
