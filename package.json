@@ -23,8 +23,6 @@
     "forever": "~0.13.0",
     "connect-timeout": "~1.5.0",
     "coverart": "0.0.1",
-    "c0lor": "^0.1.0",
-    "flatcolors": "^0.1.0",
     "imagecolors": "^0.10.5",
     "nodecogs": "git://github.com/gabek/nodecogs.git",
     "disconnect": "~0.6.0",
