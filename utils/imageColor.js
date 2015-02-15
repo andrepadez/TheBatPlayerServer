@@ -16,10 +16,7 @@ function getColorForUrl(url, callback) {
   utils.download(url, path, function() {
 
     try {
-      // var image = fs.readFileSync(path);
-
-      // var originalrgb = colorThief.getColor(image, 1);
-      imagecolors.extract(path, 5, function(err, colors) {
+      imagecolors.extract(path, 7, function(err, colors) {
 
         if (!err && colors.length > 0) {
           var colorObject = buildColorObjectFromColors(colors);
@@ -31,6 +28,7 @@ function getColorForUrl(url, callback) {
 
     } catch (e) {
       log(e);
+      callback(null);
     }
 
 
@@ -59,11 +57,6 @@ function buildColorObjectFromColors(colors) {
   colorObject.rgb.blue = originalRgb[2];
   colorObject.hex = color.hex;
   colorObject.int = 65536 * originalRgb[0] + 256 * originalRgb[1] + originalRgb[2];
-
-  // Doesn't work
-  //var colorFormats = C.RGB(rgb[0], rgb[1], rgb[2]);
-  //colorObject.xyz = ColorSpace.XYZ(colorFormats);
-  //
 
   X = 1.076450 * rgb[0] - 0.237662 * rgb[1] + 0.161212 * rgb[2];
   Y = 0.410964 * rgb[0] + 0.554342 * rgb[1] + 0.034694 * rgb[2];
@@ -119,13 +112,15 @@ function getColorFromColorArray(colors) {
   var selectedColor = colors[0];
 
   // If per chance we selected something we don't want then remedy that.
-  while (selectedColor.family == "dark" || selectedColor.family == "black") {
+  while (selectedColor.family === "dark" || selectedColor.family === "black" || selectedColor.family === "white") {
+    selectedColor = colors[index];
     index++;
-    if (index === colors.length - 1) {
-      // console.log("Color selection failed.  Using fallback.");
-      return colors[3]; // Fallback color
+
+    if (index > colors.length) {
+      selectedColor = colors[3]; //Fallback
     }
   }
+
   return selectedColor;
 }
 

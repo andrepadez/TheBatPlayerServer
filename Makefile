@@ -14,17 +14,17 @@ dev:
 	@NODE_ENV=development node bin/www
 
 restart:
-	@NODE_ENV=production forever restartall
-	forever logs -f 0
+	@NODE_ENV=production pm2 restart all
+	pm2 logs
 
 start:
-	@NODE_ENV=production forever start bin/www
-	forever logs -f 0
+	@NODE_ENV=production pm2 start -i 4 bin/www
+	pm2 logs
 
 stop:
-	 forever stopall
+	pm2 stop all
 
 log:
-	forever logs -f 0
+	pm2 logs
 
 .PHONY: test test-w dev restart start stop

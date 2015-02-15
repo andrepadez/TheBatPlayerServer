@@ -17,6 +17,7 @@ module.exports = (function() {
       if (path) {
 
         fs.readFile(path, function(err, data) {
+          res.setHeader('Cache-Control', 'public, max-age=31557600'); // one year
           res.writeHead(200, {
             'Content-Type': 'image/jpeg'
           });
