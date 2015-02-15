@@ -1,14 +1,6 @@
 var expect = require("chai").expect;
 var async = require("async");
-
-var Memcached = require('memcached');
-memcacheClient = new Memcached();
-memcacheClient.connect("127.0.0.1:11211", function() {});
-
 var album = require("../modules/getAlbum.js");
-
-// var artist = "Icon of Coil";
-// var track = "Situations Like These (single version)";
 
 var tracks = [];
 tracks.push({
@@ -21,25 +13,32 @@ tracks.push({
   track: "The Dark Half",
   album: "'Til Death"
 });
+tracks.push({
+  artist: "Nine Inch Nails",
+  track: "Down In It",
+  album: "Pretty Hate Machine"
+});
+tracks.push({
+  artist: "Cher",
+  track: "Believe",
+  album: "Believe"
+});
 
 async.each(tracks, function(singleTrack, callback) {
-  // album.fetchAlbumForArtistAndTrack(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-  //   console.log(albumObject);
-  // });
 
   describe("getAlbumsFromDiscogs", function() {
     it("Should return an album from discogs for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
 
       album.getAlbumFromDiscogs(singleTrack.artist, singleTrack.track, function(error, albumObject) {
         console.log(albumObject);
-        expect(albumObject).to.not.be.empty();
-        expect(albumObject).to.have.property('name');
-        expect(albumObject).to.have.property('image');
-        expect(albumObject).to.have.property('released');
-        expect(albumObject).to.have.property('mbid');
-        expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-        done();
-        // callback();
+        check(done, function() {
+          expect(albumObject).to.exist;
+          expect(albumObject).to.have.property('name');
+          expect(albumObject).to.have.property('image');
+          expect(albumObject).to.have.property('released');
+          expect(albumObject).to.have.property('mbid');
+          expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
+        });
       });
 
     });
@@ -50,14 +49,14 @@ async.each(tracks, function(singleTrack, callback) {
 
       album.getAlbumFromMusicbrainz(singleTrack.artist, singleTrack.track, function(error, albumObject) {
         console.log(albumObject);
-
-        expect(albumObject).to.not.be.empty();
-        expect(albumObject).to.have.property('name');
-        expect(albumObject).to.have.property('image');
-        expect(albumObject).to.have.property('released');
-        expect(albumObject).to.have.property('mbid');
-        expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-        done();
+        check(done, function() {
+          expect(albumObject).to.exist;
+          expect(albumObject).to.have.property('name');
+          expect(albumObject).to.have.property('image');
+          expect(albumObject).to.have.property('released');
+          expect(albumObject).to.have.property('mbid');
+          expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
+        });
       });
 
     });
@@ -68,15 +67,25 @@ async.each(tracks, function(singleTrack, callback) {
 
       album.albumFromLastFM(singleTrack.artist, singleTrack.track, function(error, albumObject) {
         console.log(albumObject);
-
-        expect(albumObject).to.not.be.empty();
-        expect(albumObject).to.have.property('name');
-        expect(albumObject).to.have.property('image');
-        expect(albumObject).to.have.property('released');
-        expect(albumObject).to.have.property('mbid');
-        expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-        done();
+        check(done, function() {
+          expect(albumObject).to.exist;
+          expect(albumObject).to.have.property('name');
+          expect(albumObject).to.have.property('image');
+          expect(albumObject).to.have.property('released');
+          expect(albumObject).to.have.property('mbid');
+          expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
+        });
       });
     });
   });
 });
+
+
+function check(done, f) {
+  try {
+    f();
+    done();
+  } catch (e) {
+    done(e);
+  }
+}

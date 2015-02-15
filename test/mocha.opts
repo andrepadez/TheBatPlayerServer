@@ -1,0 +1,4 @@
+--require mocha-clean
+--require mocha-clean/brief
+--growl
+--timeout 15000

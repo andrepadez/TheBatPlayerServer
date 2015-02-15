@@ -32,7 +32,6 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
 
     str += response;
     var decodedString = new Buffer(str).toString();
-    console.log(decodedString);
     var substring = "StreamTitle=";
     var position = decodedString.indexOf(substring);
 
