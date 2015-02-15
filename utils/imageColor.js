@@ -2,6 +2,7 @@ var utils = require('./utils.js');
 var fs = require('fs');
 var md5 = require('MD5');
 var log = utils.log;
+var async = require("async");
 
 var imagecolors = require('imagecolors');
 var colormatch = require('colormatch');
@@ -16,8 +17,7 @@ function getColorForUrl(url, callback) {
       imagecolors.extract(path, 7, function(err, colors) {
 
         if (!err && colors.length > 0) {
-          var colorObject = buildColorObjectFromColors(colors);
-          callback(colorObject);
+          buildColorObjectFromColors(colors, callback);
         } else {
           callback(null);
         }
@@ -32,9 +32,7 @@ function getColorForUrl(url, callback) {
   });
 }
 
-function buildColorObjectFromColors(colors) {
-  var color = getColorFromColorArray(colors);
-
+function buildColorObjectFromColors(colors, callback) {
   var colorObject = {
     rgb: {
       red: null,
@@ -46,79 +44,58 @@ function buildColorObjectFromColors(colors) {
     xyz: null
   };
 
-  var rgb = [color.rgb.r, color.rgb.g, color.rgb.b];
-  var originalRgb = [color.rgb.r, color.rgb.g, color.rgb.b];
+  getColorFromColorArray(colors, function(color) {
+    var rgb = [color.rgb.r, color.rgb.g, color.rgb.b];
 
-  colorObject.rgb.red = originalRgb[0];
-  colorObject.rgb.green = originalRgb[1];
-  colorObject.rgb.blue = originalRgb[2];
-  colorObject.hex = color.hex;
-  colorObject.int = 65536 * originalRgb[0] + 256 * originalRgb[1] + originalRgb[2];
+    colorObject.rgb.red = rgb[0];
+    colorObject.rgb.green = rgb[1];
+    colorObject.rgb.blue = rgb[2];
+    colorObject.hex = color.hex;
+    colorObject.int = 65536 * rgb[0] + 256 * rgb[1] + rgb[2];
 
-  X = 1.076450 * rgb[0] - 0.237662 * rgb[1] + 0.161212 * rgb[2];
-  Y = 0.410964 * rgb[0] + 0.554342 * rgb[1] + 0.034694 * rgb[2];
-  Z = -0.010954 * rgb[0] - 0.013389 * rgb[1] + 1.024343 * rgb[2];
+    X = 1.076450 * rgb[0] - 0.237662 * rgb[1] + 0.161212 * rgb[2];
+    Y = 0.410964 * rgb[0] + 0.554342 * rgb[1] + 0.034694 * rgb[2];
+    Z = -0.010954 * rgb[0] - 0.013389 * rgb[1] + 1.024343 * rgb[2];
 
-  colorObject.xyz = {
-    x: X,
-    y: Y,
-    z: Z
-  };
+    colorObject.xyz = {
+      x: X,
+      y: Y,
+      z: Z
+    };
 
-  return colorObject;
+    callback(colorObject);
+  });
+
 }
 
-function getColorFromColorArray(colors) {
+function getColorFromColorArray(colors, mainCallback) {
 
-  colors.sort(function(a, b) {
+  async.sortBy(colors, function(singleColor, callback) {
+    var colorVal = (singleColor.score.vivid * singleColor.luminance) * singleColor.percent;
+    callback(null, colorVal * -1);
+  }, function(error, colors) {
+    async.filter(colors, function(singleColor, callback) {
 
-    if (a.score.dark > 40) {
-      console.log(a.score.dark);
-      // console.log("Too dark");
-      return -1;
-    }
+      if (singleColor.family === "dark") {
+        return callback(false);
+      }
 
-    if (a.family == "white") {
-      // console.log("Too white");
-      return -1;
-    }
+      if (singleColor.family === "black") {
+        return callback(false);
+      }
 
-    if (a.family == "black") {
-      // console.log("Too black");
-      return -1;
-    }
+      if (singleColor.family === "white") {
+        return callback(false);
+      }
 
-    var rgb = [a.rgb.r, a.rgb.g, a.rgb.b];
-    var skin = [229, 160, 115];
-    var isSkin = colormatch.quickMatch(rgb, skin);
-    if (isSkin) {
-      // console.log("Looks like skin color");
-      return -1;
-    }
+      return callback(true);
 
-    if (a.percent < 5) {
-      // console.log("Not enough of this color.");
-      return -1;
-    }
-
+    }, function(updatedColors) {
+      mainCallback(updatedColors[0]);
+    });
 
   });
 
-
-  var index = 0;
-  var selectedColor = colors[0];
-
-  // If per chance we selected something we don't want then remedy that.
-  while (selectedColor.family === "dark" || selectedColor.family === "black" || selectedColor.family === "white") {
-    selectedColor = colors[index];
-    index++;
-
-    if (index > colors.length) {
-      selectedColor = colors[3]; //Fallback
-    }
-  }
-
-  return selectedColor;
 }
 
 if (!Array.prototype.last) {
