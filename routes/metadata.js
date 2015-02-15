@@ -6,8 +6,6 @@ module.exports = (function() {
   var router = express.Router();
 
   router.get("/:streamurl", function(req, res) {
-    // req.app.disable('etag');
-
     var cacheAge = config.cachetime;
     res.setHeader('Cache-Control', 'public, max-age=' + cacheAge);
     res.header("Content-Type", "application/json; charset=utf-8");

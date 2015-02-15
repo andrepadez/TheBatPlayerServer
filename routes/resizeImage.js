@@ -6,6 +6,8 @@ module.exports = (function() {
   var router = express.Router();
 
   router.get("/:imageurl/:width/:height", function(req, res) {
+    req.app.set('etag', 'weak');
+
     var url = req.params.imageurl;
     var width = req.params.width;
     var height = req.params.height;
