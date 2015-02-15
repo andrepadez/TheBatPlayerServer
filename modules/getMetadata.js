@@ -8,7 +8,7 @@ var moment = require("moment");
 var album = require("./getAlbum.js");
 var md5 = require('MD5');
 var config = require("../config.js");
-var asciify = require('asciify-string');
+var charmed = require('charmed');
 
 var S = require('string');
 S.extendPrototype();
@@ -246,7 +246,7 @@ function populateTrackObjectWithArtist(track, apiData) {
 
       track.image.url = apiData.image.last()["#text"];
       track.isOnTour = parseInt(apiData.ontour);
-      track.bio.text = asciify(bioText);
+      track.bio.text = charmed.toSimple(bioText);
       track.bio.published = bioDate.year();
       track.tags = apiData.tags.tag.map(function(tagObject) {
         return tagObject.name;
@@ -262,7 +262,7 @@ function populateTrackObjectWithTrack(track, apiData) {
 
   if (apiData) {
     try {
-      track.album.name = asciify(apiData.album.title);
+      track.album.name = charmed.toSimple(apiData.album.title);
       track.album.image = apiData.album.image.last()["#text"];
       track.metaDataFetched = true;
     } catch (e) {

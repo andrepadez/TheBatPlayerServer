@@ -35,6 +35,7 @@
     "valid-url": "^1.0.9",
     "colormatch": "0.0.4",
     "compression": "^1.4.0",
-    "asciify-string": "^0.1.1"
+    "asciify-string": "^0.1.1",
+    "charmed": "^0.2.8"
   }
 }
