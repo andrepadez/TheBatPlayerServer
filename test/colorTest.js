@@ -23,15 +23,17 @@ urls.push("http://userserve-ak.last.fm/serve/500/22199291/Apoptygma+Berzerk+6.jp
 urls.push("http://userserve-ak.last.fm/serve/_/69789864/VNV+Nation+693.png"); //Shouln't be white
 var html = "";
 
+var singleUrl = urls[0];
 async.each(urls, function(singleUrl, callback) {
+
   describe("createBackground " + singleUrl, function() {
-    it("Should create a background image from url and color", function(done) {
+    it("Should create a background image from " + singleUrl, function() {
 
       imageColor.getColorForUrl(singleUrl, function(colorObject) {
         backgroundImage.createBackground(singleUrl, colorObject.rgb, function(error, backgroundImagePath) {
           html = html + "<div style=\"background-color:" + colorObject.hex + "\"><img src=" + singleUrl + "><img src=" + backgroundImagePath + "><br>" + JSON.stringify(colorObject) + "</div>";
-          callback();
           done();
+          return callback();
         });
       });
     });

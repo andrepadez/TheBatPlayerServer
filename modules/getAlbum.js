@@ -91,7 +91,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
 
       });
     } else {
-      mainCallback(null, null);
+      return mainCallback(null, null);
     }
 
   });

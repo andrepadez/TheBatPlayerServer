@@ -11,6 +11,8 @@ var colormatch = require('colormatch');
 var ColorSpace = C.space.rgb['CIE-RGB'];
 
 function getColorForUrl(url, callback) {
+  var i = Math.floor(Math.random() * 100);
+
   var path = utils.getCacheFilepathForUrl(url, "original");
 
   utils.download(url, path, function() {
@@ -27,7 +29,7 @@ function getColorForUrl(url, callback) {
       });
 
     } catch (e) {
-      log(e);
+      console.log(e);
       return callback(null);
     }
 

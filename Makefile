@@ -1,7 +1,6 @@
 REPORTER = dot
-
 test:
-	@NODE_ENV=test /usr/local/bin/mocha --opts test/mocha.opts --timeout 15000 --reporter nyan
+	@NODE_ENV=test /usr/local/bin/mocha --opts test/mocha.opts --timeout 15000 --reporter nyan --require mocha-clean --growl
 
 test-w:
 	@NODE_ENV=test /usr/local/bin/mocha --timeout 5000 \

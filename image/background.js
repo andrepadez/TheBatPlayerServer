@@ -5,7 +5,6 @@ var config = require("../config.js");
 var log = utils.log;
 
 function createBackground(url, colorObject, callback) {
-
   var path = utils.getCacheFilepathForUrl(url, "backgrounds");
   var cacheFile = utils.getCacheFilepathForUrl(url, "original");
 
@@ -24,7 +23,6 @@ function createBackground(url, colorObject, callback) {
           return callback(null, path);
         } else {
           log("Error: " + stderr);
-
           return callback(stderr, cacheFile);
         }
 
