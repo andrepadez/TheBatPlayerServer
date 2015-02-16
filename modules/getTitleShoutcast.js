@@ -10,7 +10,7 @@ function getV1Title(url, callback) {
   var maxSize = 1000;
   var size = 0;
 
-  log("Fetching " + url);
+  // console.log("Fetching " + url);
 
   var options = {
     url: url,

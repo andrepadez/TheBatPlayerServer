@@ -11,8 +11,7 @@ function createBackground(url, colorObject, callback) {
 
   fs.exists(path, function(exists) {
     if (exists && config.enableImageCache) {
-      callback(null, path);
-      return;
+      return callback(null, path);
     }
 
     utils.download(url, cacheFile, function() {
@@ -22,11 +21,11 @@ function createBackground(url, colorObject, callback) {
 
       var childCallback = function(err, stdout, stderr) {
         if (!err && !stderr) {
-          callback(null, path);
+          return callback(null, path);
         } else {
           log("Error: " + stderr);
 
-          callback(stderr, cacheFile);
+          return callback(stderr, cacheFile);
         }
 
       };

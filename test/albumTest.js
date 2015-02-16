@@ -24,49 +24,15 @@ tracks.push({
   album: "Believe"
 });
 
+// var singleTrack = tracks[0];
+// album.fetchAlbumForArtistAndTrack(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//   console.log(albumObject);
+// });
+
 async.each(tracks, function(singleTrack, callback) {
-
-  describe("getAlbumsFromDiscogs", function() {
-    it("Should return an album from discogs for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
-
-      album.getAlbumFromDiscogs(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-        console.log(albumObject);
-        check(done, function() {
-          expect(albumObject).to.exist;
-          expect(albumObject).to.have.property('name');
-          expect(albumObject).to.have.property('image');
-          expect(albumObject).to.have.property('released');
-          expect(albumObject).to.have.property('mbid');
-          expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-        });
-      });
-
-    });
-  });
-
-  describe("getAlbumsFromMusicbrainz", function() {
-    it("Should return an album from musicbrainz for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
-
-      album.getAlbumFromMusicbrainz(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-        console.log(albumObject);
-        check(done, function() {
-          expect(albumObject).to.exist;
-          expect(albumObject).to.have.property('name');
-          expect(albumObject).to.have.property('image');
-          expect(albumObject).to.have.property('released');
-          expect(albumObject).to.have.property('mbid');
-          expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-        });
-      });
-
-    });
-  });
-
-  describe("albumFromLastFM", function() {
-    it("Should return an album from LastFM for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
-
-      album.albumFromLastFM(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-        console.log(albumObject);
+  describe("fetchAlbumForArtistAndTrack", function() {
+    it("Should return an album for use in metadata using " + singleTrack.artist + " - " + singleTrack.track, function(done) {
+      album.fetchAlbumForArtistAndTrack(singleTrack.artist, singleTrack.track, function(error, albumObject) {
         check(done, function() {
           expect(albumObject).to.exist;
           expect(albumObject).to.have.property('name');
@@ -79,6 +45,60 @@ async.each(tracks, function(singleTrack, callback) {
     });
   });
 });
+
+//   describe("getAlbumsFromDiscogs", function() {
+//     it("Should return an album from discogs for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
+//
+//       album.getAlbumFromDiscogs(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//         console.log(albumObject);
+//         check(done, function() {
+//           expect(albumObject).to.exist;
+//           expect(albumObject).to.have.property('name');
+//           expect(albumObject).to.have.property('image');
+//           expect(albumObject).to.have.property('released');
+//           expect(albumObject).to.have.property('mbid');
+//           expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
+//         });
+//       });
+//
+//     });
+//   });
+//
+//   describe("getAlbumsFromMusicbrainz", function() {
+//     it("Should return an album from musicbrainz for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
+//
+//       album.getAlbumFromMusicbrainz(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//         console.log(albumObject);
+//         check(done, function() {
+//           expect(albumObject).to.exist;
+//           expect(albumObject).to.have.property('name');
+//           expect(albumObject).to.have.property('image');
+//           expect(albumObject).to.have.property('released');
+//           expect(albumObject).to.have.property('mbid');
+//           expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
+//         });
+//       });
+//
+//     });
+//   });
+//
+//   describe("albumFromLastFM", function() {
+//     it("Should return an album from LastFM for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
+//
+//       album.albumFromLastFM(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//         console.log(albumObject);
+//         check(done, function() {
+//           expect(albumObject).to.exist;
+//           expect(albumObject).to.have.property('name');
+//           expect(albumObject).to.have.property('image');
+//           expect(albumObject).to.have.property('released');
+//           expect(albumObject).to.have.property('mbid');
+//           expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
+//         });
+//       });
+//     });
+//   });
+// });
 
 
 function check(done, f) {

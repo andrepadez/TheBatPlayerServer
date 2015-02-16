@@ -29,66 +29,71 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
   async.parallel([
 
     // Try the cache
-    // function(callback) {
-    //   utils.getCacheData(albumObjectCacheKey, function(error, albumObject) {
-    //     if (!error && albumObject !== undefined && config.enableCache) {
-    //       album = albumObject;
-    //       return callback(null, albumObject);
-    //     }
-    //   });
-    //
-    // },
+    function(callback) {
+      utils.getCacheData(albumObjectCacheKey, function(error, albumObject) {
+        if (!error && albumObject !== undefined && config.enableCache) {
+          album = albumObject;
+          return callback(null, albumObject);
+        } else {
+          return callback(null, null);
+        }
+      });
+
+    },
 
     // Try Discogs
-    // function(callback) {
-    //   if (!album) {
-    //     getAlbumFromDiscogs(artist, track, function(error, albumObject) {
-    //       return callback(error, albumObject);
-    //     });
-    //   } else {
-    //     return callback(null, null);
-    //   }
-    // },
+    function(callback) {
+      if (!album) {
+        getAlbumFromDiscogs(artist, track, callback);
+      } else {
+        return callback(null, null);
+      }
+    },
 
     // Try musicbrainz
     function(callback) {
       if (!album) {
-        getAlbumFromMusicbrainz(artist, track, function(error, albumObject) {
-          console.log("JJKFJLF");
-          return callback(error, albumObject);
-        });
+        getAlbumFromMusicbrainz(artist, track, callback);
+      } else {
+        return callback(null, null);
+      }
+    },
+
+    // // Try Last.FM
+    function(callback) {
+      if (!album) {
+        albumFromLastFM(artist, track, callback);
       } else {
         return callback(null, null);
       }
     }
 
-    // Try Last.FM
-    // function(callback) {
-    //   if (!album) {
-    //     albumFromLastFM(artist, track, function(error, albumObject) {
-    //       return callback(error, albumObject);
-    //     });
-    //   } else {
-    //     return callback(null, null);
-    //   }
-    // }
   ], function(error, albums) {
-    console.log(albums);
-    var album = albums[0];
-    if (!album) {
-      return mainCallback(null);
-    }
-    album.artist = artist;
+    // console.log("Total " + albums.length + " albums returned.");
+    if (albums.length > 0) {
+      async.filter(albums, function(singleAlbum, callback) {
+        return callback((singleAlbum !== null && singleAlbum.image !== null) || (singleAlbum && singleAlbum.mbid !== null));
+      }, function(results) {
+        var album = results[0];
 
-    console.log("Getting art for " + album.name);
+        if (!album) {
+          return mainCallback(null, null);
+        }
+        album.artist = artist;
 
-    if (!album.image) {
-      getAlbumArtForAlbum(album, function(finalAlbum) {
-        mainCallback(finalAlbum);
+        if (!album.image) {
+          getAlbumArtForAlbum(album, function(error, finalAlbum) {
+            return mainCallback(error, finalAlbum);
+          });
+        } else {
+          return mainCallback(error, album);
+        }
+
       });
     } else {
-      mainCallback(album);
+      mainCallback(null, null);
     }
+
   });
 }
 
@@ -103,38 +108,41 @@ function getAlbumArtForAlbum(album, mainCallback) {
           if (!error && result) {
             album.image = result;
           }
-          return callback(album);
+          return callback(null, album);
         });
 
       } else {
-        return callback(album);
+        return callback(null, album);
       }
     },
 
     // Get album art from Discogs
     function(callback) {
-      if (album.mbid && !album.image) {
+      if (album.mbid !== null && !album.image) {
+
         getAlbumArtFromDiscogsWithMBID(album.mbid, function(error, result) {
           if (!error && result) {
             album.image = result;
           }
-          return callback(album);
+          return callback(null, album);
         });
       } else {
-        return callback(album);
+        return callback(null, null);
       }
     }
 
-  ], function(error, album) {
-    // if (!album || error) {
-    //   var willRetry = retrySanitized(artistName, trackName, callback);
-    //   if (!willRetry) {
-    //     return mainCallback(error, album);
-    //   }
-    // }
-
-    // utils.cacheData(albumObjectCacheKey, album, 0);
-    return mainCallback(error, album);
+  ], function(error, albums) {
+    async.filter(albums, function(singleAlbum, callback) {
+      return callback(singleAlbum.image !== null);
+    }, function(results) {
+      var finalAlbum;
+      if (results.length > 0) {
+        finalAlbum = results[0];
+      } else {
+        finalAlbum = albums[0];
+      }
+      return mainCallback(error, finalAlbum);
+    });
   });
 }
 
@@ -143,7 +151,7 @@ function retrySanitized(artistName, trackName, callback) {
   var updatedTrack = utils.sanitize(trackName);
 
   if (updatedArtist != artistName || updatedTrack != trackName) {
-    console.log("No album. Attempting retry.");
+    log("No album. Attempting retry.");
     fetchAlbumForArtistAndTrack(updatedArtist, updatedTrack, callback);
     return true;
   } else {
@@ -209,11 +217,13 @@ function getAlbumFromMusicbrainz(artistName, trackName, callback) {
           if (album) {
             var albumObject = createAlbumObject(album.name, null, album.date, album.mbid);
             albumObject.source = "Musicbrainz";
-            callback(error, albumObject);
+            return callback(error, albumObject);
           } else {
-            callback(null, null);
+            return callback(null, null);
           }
         });
+      } else {
+        return callback(null, null);
       }
     }
   });
@@ -239,7 +249,8 @@ function getAlbumArtFromDiscogsWithMBID(mbid, callback) {
     if (!err) {
       if (response && response.images.length > 0) {
         var imageObject = response.images[0];
-        return callback(err, imageObject);
+        var url = imageObject.thumbnails.small;
+        return callback(err, url);
       } else {
         return callback(err, null);
       }
@@ -282,7 +293,6 @@ function getAlbumFromDiscogs(artistName, trackName, callback) {
         callback(err, null);
       }
     } else {
-      log(err);
       callback(err, null);
     }
   });
@@ -292,7 +302,7 @@ function getAlbumFromDiscogs(artistName, trackName, callback) {
 function getAlbumFromAlbums(albumsArray, mainCallback) {
   // If there's only one then don't go through the below work.
   if (albumsArray.length === 1) {
-    return albumsArray[0];
+    return mainCallback(albumsArray[0]);
   }
 
   albumsArray.sort(function(a, b) {
@@ -359,22 +369,6 @@ function getAlbumFromAlbums(albumsArray, mainCallback) {
       return mainCallback(null);
     }
   });
-
-  // var updatedAlbums = [];
-  //
-  // i = albumsArray.length;
-  // while (i--) {
-  //   var singleAlbum = albumsArray[i];
-  //   if (!(_.includes(singleAlbum.type, "Live") && (_.includes(singleAlbum.type, ("Official")) || _.includes(singleAlbum.type, ("Album")) || _.includes(singleAlbum.type, ("Single")) || _.includes(singleAlbum.type, ("EP"))))) {
-  //     updatedAlbums.push(singleAlbum);
-  //   }
-  // }
-  //
-  // if (updatedAlbums.length > 0) {
-  //   return updatedAlbums[0];
-  // } else {
-  //   return null;
-  // }
 
 }
 

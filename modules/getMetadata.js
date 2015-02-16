@@ -22,8 +22,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
     error.message = "The URL " + url + " does not appear to be a valid URL.  Please verify it's a properly encoded URL.";
     error.errorCode = 406;
     error.batserver = config.useragent;
-    mainCallback(error, null);
-    return;
+    return mainCallback(error, null);
   }
 
   var track = null;
@@ -50,11 +49,9 @@ function fetchMetadataForUrl(url, req, mainCallback) {
           utils.getCacheData(streamCacheKey, function(error, result) {
             if (!error && result) {
               track = result;
-              mainCallback(error, track);
-              return;
-              // cleanup();
+              return mainCallback(error, track);
             } else {
-              callback();
+              return callback();
             }
           });
         },
@@ -70,10 +67,10 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                   utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V1", fetchMethodCacheTime);
                 }
               }
-              callback();
+              return callback();
             });
           } else {
-            callback();
+            return callback();
           }
         },
 
@@ -87,19 +84,18 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 if (!metadataSource) {
                   utils.cacheData(streamFetchMethodCacheKey, "SHOUTCAST_V2", fetchMethodCacheTime);
                 }
-
               }
-              callback();
+              return callback();
             });
           } else {
-            callback();
+            return callback();
           }
 
         },
 
         // Get the title from the station stream
         function(callback) {
-          if (track === null && (metadataSource != "SHOUTCAST_V2" && "SHOUTCAST_V1")) {
+          if (track === null) {
             streamtitle.getTitle(url, function(error, title) {
               if (title) {
                 track = utils.createTrackFromTitle(title);
@@ -107,16 +103,15 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 track.station.fetchsource = "STREAM";
                 utils.cacheData(streamFetchMethodCacheKey, "STREAM", fetchMethodCacheTime);
               }
-              callback();
+              return callback();
             });
           } else {
-            callback();
+            return callback();
           }
         },
 
         function(asyncCallback) {
           if (track) {
-
             async.parallel([
                 function(callback) {
                   async.series([ //Begin Artist / Color series
@@ -156,7 +151,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
                 // Get Album for track
                 function(callback) {
                   if (track.artist && track.song) {
-                    getAlbumDetails(track, function(albumObject) {
+                    getAlbumDetails(track, function(error, albumObject) {
                       track.album = albumObject;
                       return callback();
                     });
@@ -173,7 +168,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
               });
           } else {
             return asyncCallback(); // No track exists so track and album details could not take place
-
           }
         }
       ],
@@ -200,21 +194,19 @@ function fetchMetadataForUrl(url, req, mainCallback) {
 function getArtistDetails(track, callback) {
   lastfm.getArtistDetails(utils.sanitize(track.artist), function(error, artistDetails) {
     populateTrackObjectWithArtist(track, artistDetails);
-    callback();
+    return callback();
   });
 }
 
 function getTrackDetails(track, callback) {
   lastfm.getTrackDetails(utils.sanitize(track.artist), utils.sanitize(track.song), function(error, trackDetails) {
     populateTrackObjectWithTrack(track, trackDetails);
-    callback();
+    return callback();
   });
 }
 
 function getAlbumDetails(track, callback) {
-  album.fetchAlbumForArtistAndTrack(track.artist, track.song, function(error, albumDetails) {
-    callback(albumDetails);
-  });
+  album.fetchAlbumForArtistAndTrack(track.artist, track.song, callback);
 }
 
 function getColor(track, callback) {
@@ -223,10 +215,10 @@ function getColor(track, callback) {
       if (color) {
         track.image.color = color;
       }
-      callback();
+      return callback();
     });
   } else {
-    callback();
+    return callback();
   }
 
 }

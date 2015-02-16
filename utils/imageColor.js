@@ -20,15 +20,15 @@ function getColorForUrl(url, callback) {
 
         if (!err && colors.length > 0) {
           var colorObject = buildColorObjectFromColors(colors);
-          callback(colorObject);
+          return callback(colorObject);
         } else {
-          callback(null);
+          return callback(null);
         }
       });
 
     } catch (e) {
       log(e);
-      callback(null);
+      return callback(null);
     }
 
 
@@ -76,7 +76,6 @@ function getColorFromColorArray(colors) {
   colors.sort(function(a, b) {
 
     if (a.score.dark > 40) {
-      console.log(a.score.dark);
       // console.log("Too dark");
       return -1;
     }

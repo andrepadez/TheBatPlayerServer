@@ -31,14 +31,13 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
     var title = null;
 
     str += response;
-    var decodedString = new Buffer(str).toString();
     var substring = "StreamTitle=";
-    var position = decodedString.indexOf(substring);
+    var position = str.indexOf(substring);
 
     if (position > -1) {
       client.destroy();
-      var endPosition = decodedString.toString().indexOf(";", position);
-      var titleString = decodedString.substring(position, endPosition);
+      var endPosition = str.toString().indexOf(";", position);
+      var titleString = str.substring(position, endPosition);
       title = titleString.substring(13, titleString.length - 1);
       parentCallback(null, title);
     }
@@ -52,6 +51,7 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
 
   client.on('data', callback);
   client.on('error', errorCallback);
+  client.on('close', errorCallback);
 
 };
 
