@@ -21,6 +21,7 @@ urls.push("http://userserve-ak.last.fm/serve/_/100584217/orifis+Dave+Levison.png
 urls.push("http://userserve-ak.last.fm/serve/500/478622/Orange+Sector.jpg"); // Should be rust colored.  Comes out dark gray.
 urls.push("http://userserve-ak.last.fm/serve/500/22199291/Apoptygma+Berzerk+6.jpg"); //Should be white.  Comes out dark.
 urls.push("http://userserve-ak.last.fm/serve/_/69789864/VNV+Nation+693.png"); //Shouln't be white
+urls.push("http://userserve-ak.last.fm/serve/500/3742924/Heart+Ann++Nancy+relaxing+77.jpg"); // Don't want flesh color
 var html = "";
 
 async.each(urls, function(singleUrl, callback) {

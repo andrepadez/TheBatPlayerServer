@@ -88,15 +88,38 @@ function getColorFromColorArray(colors, mainCallback) {
         return callback(false);
       }
 
+      if (isBannedColor(singleColor)) {
+        return callback(false);
+      }
+
       return callback(true);
 
     }, function(updatedColors) {
+      if (updatedColors.length === 0) {
+        console.log("no colors detected.  Using fallback.");
+      }
       var color = updatedColors[0] || colors[3];
       mainCallback(color);
     });
 
   });
+}
 
+function isBannedColor(color) {
+  var bannedColor = {
+    red: 239,
+    green: 208,
+    blue: 207
+  };
+  if (color.family === "orange") {
+    var colorDistance = Math.sqrt((bannedColor.red - color.rgb.r) ^ 2 + (bannedColor.green - color.rgb.g) ^ 2 + (bannedColor.blue - color.rgb.b) ^ 2);
+    var similarityPercentage = colorDistance / Math.sqrt((255) ^ 2 + (255) ^ 2 + (255) ^ 2);
+    console.log("Similarity perentage: " + similarityPercentage);
+    if (similarityPercentage > 0.7) {
+      return true;
+    }
+  }
+  return false;
 }
 
 if (!Array.prototype.last) {
