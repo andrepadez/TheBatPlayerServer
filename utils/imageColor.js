@@ -114,9 +114,9 @@ function isBannedColor(color) {
   if (color.family === "orange") {
     var colorDistance = Math.sqrt((bannedColor.red - color.rgb.r) ^ 2 + (bannedColor.green - color.rgb.g) ^ 2 + (bannedColor.blue - color.rgb.b) ^ 2);
     var similarityPercentage = colorDistance / Math.sqrt((255) ^ 2 + (255) ^ 2 + (255) ^ 2);
-
+    console.log("Image Percent: " + color.percent + ". Similarity percent: " + similarityPercentage);
     // Color is skin tone-ish and not a large percent of the image.
-    if (similarityPercentage > 0.6 && color.percent < 5) {
+    if (similarityPercentage > 0.5 && color.percent < 7) {
       return true;
     }
   }
