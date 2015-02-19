@@ -27,7 +27,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
   }
 
   var track = null;
-  var fetchMethodCacheTime = 21600;
+  var fetchMethodCacheTime = Math.floor(Date.now() / 1000) + (config.cachetime * 60);
   var streamCacheKey = ("cache-stream-" + url).slugify();
 
   var sourceStreamCacheKey = ("cache-source-stream-" + url).slugify();
