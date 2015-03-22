@@ -33,7 +33,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
   var sourceStreamCacheKey = ("cache-source-stream-" + url).slugify();
   var metadataSource;
   var streamFetchMethodCacheKey = ("cache-stream-fetchmethod" + url).slugify();
-  // global.memcacheClient = req.app.memcacheClient;
 
   if (url.endsWith("/;")) {
     url = url + "/;";
