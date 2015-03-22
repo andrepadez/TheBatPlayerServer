@@ -11,11 +11,12 @@ var i = Math.floor(Math.random() * streams.length);
 var stream = streams[i];
 
 describe("streamTitle", function() {
-
-  it("Should return a title from " + stream + ".", function(done) {
+  it("Should return a title from " + stream, function(done) {
     getStreamTitle.getTitle(stream, function(error, title) {
       check(done, function() {
-        expect(title).to.not.be.empty();
+        console.log("Result: " + title);
+
+        expect(title).to.not.be.null();
         expect(title).to.be.a('string');
         expect(title).to.contain(' - ');
       });

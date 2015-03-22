@@ -20,7 +20,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
   if (!validUrl.isUri(url)) {
     var error = {};
     error.message = "The URL " + url + " does not appear to be a valid URL.  Please verify it's a properly encoded URL.";
-    error.errorCode = 406;
+    error.status = 406;
     error.batserver = config.useragent;
     return mainCallback(error, null);
   }
@@ -176,7 +176,7 @@ function fetchMetadataForUrl(url, req, mainCallback) {
         if (!track) {
           var error = {};
           error.message = "No data was able to be fetched for your requested radio stream: " + decodeURIComponent(url) + ". Make sure your stream url is valid and encoded properly.  It's also possible the server just doesn't supply any metadata for us to provide you.";
-          error.errorCode = 400;
+          error.status = 400;
           error.batserver = config.useragent;
           return mainCallback(error, null);
         }

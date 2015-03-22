@@ -7,6 +7,8 @@ var log = utils.log;
 var StreamTitle = function() {};
 
 StreamTitle.prototype.getTitle = function(url, parentCallback) {
+  var completed = false;
+
   url = urlparse.parse(url);
   var client = new net.Socket();
   client.setTimeout(2);
@@ -39,19 +41,30 @@ StreamTitle.prototype.getTitle = function(url, parentCallback) {
       var endPosition = str.toString().indexOf(";", position);
       var titleString = str.substring(position, endPosition);
       title = titleString.substring(13, titleString.length - 1);
-      parentCallback(null, title);
+
+      completed = true;
+      return parentCallback(null, title);
     }
 
   };
 
   errorCallback = function(error) {
+    completed = true;
     client.destroy();
-    parentCallback(error, null);
+    return parentCallback(error, null);
   };
+
+  closeCallback = function() {
+    if (!completed) {
+      completed = true;
+      return parentCallback(null, null);
+    }
+    client.destroy()
+  }
 
   client.on('data', callback);
   client.on('error', errorCallback);
-  client.on('close', errorCallback);
+  client.on('close', closeCallback);
 
 };
 

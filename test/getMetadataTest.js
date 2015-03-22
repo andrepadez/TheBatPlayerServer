@@ -14,26 +14,28 @@ var stream = streams[i];
 
 
 describe("getMetadata", function() {
-  it("Should return an object", function(done) {
+  it("Should return an object", function() {
     metadata.fetchMetadataForUrl(stream, req, function(error, result) {
       expect(result).to.be.a("Object");
 
 
-      it("Should have required properties", function() {
+      it("Should have required properties", function(done) {
         expect(result).to.have.property('song');
         expect(result).to.have.property('artist');
         expect(result.song).to.not.be.empty();
         expect(result.artist).to.not.be.empty();
         expect(result).to.have.property('album');
+        done();
       });
 
-      it("Should have image objects", function() {
+      it("Should have image objects", function(done) {
         expect(result.image).to.have.property('url');
         expect(result.image).to.have.property('backgroundurl');
         expect(result.image).to.have.property('color');
+        done();
       });
 
-      done();
+      // done();
     });
   });
 });

@@ -41,8 +41,6 @@ describe('GET /metadata', function() {
   it('respond with error', function(done) {
     request(app)
       .get('/metadata/http%3A%2F%2F225.264.141.34%3A6699')
-      .set('Accept', 'application/json')
-      .expect('Content-Type', /json/)
       .expect(400)
       .end(function(err, res) {
         if (err) throw err;

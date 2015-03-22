@@ -27,7 +27,7 @@ var singleUrl = urls[0];
 async.each(urls, function(singleUrl, callback) {
 
   describe("createBackground " + singleUrl, function() {
-    it("Should create a background image from " + singleUrl, function() {
+    it("Should create a background image from " + singleUrl, function(done) {
 
       imageColor.getColorForUrl(singleUrl, function(colorObject) {
         backgroundImage.createBackground(singleUrl, colorObject.rgb, function(error, backgroundImagePath) {
