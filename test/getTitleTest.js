@@ -14,8 +14,6 @@ describe("streamTitle", function() {
   it("Should return a title from " + stream, function(done) {
     getStreamTitle.getTitle(stream, function(error, title) {
       check(done, function() {
-        console.log("Result: " + title);
-
         expect(title).to.not.be.null();
         expect(title).to.be.a('string');
         expect(title).to.contain(' - ');

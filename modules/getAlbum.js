@@ -11,8 +11,8 @@ var _ = require('lodash');
 var NC = require('nodecogs');
 var discogs = new NC({
   userAgent: config.useragent,
-  accessKey: "wVixYWymHCBOxPnvBDuk",
-  accessSecret: "vOLvFLHEYXngOdMRFFkTenGlwQWIpdkm"
+  accessKey: config.discogsAccesskey,
+  accessSecret: config.discogsSecret
 });
 
 var CA = require('coverart');
@@ -181,8 +181,6 @@ function getAlbumFromMusicbrainz(artistName, trackName, callback) {
   var encodedTrack = encodeURIComponent(trackName.trim());
 
   var url = "http://musicbrainz.org/ws/2/recording/?query=%22" + encodedTrack + "%22+AND+artist:%22" + encodedArtist + "%22+AND+status:%22official%22&fmt=json&limit=10";
-  // var url = "http://www.musicbrainz.org/ws/2/release/?query=%22" + encodedTrack + "22%20AND%20artist:%22" + encodedArtist + "%22&fmt=json&limit=1"
-  // console.log(url);
 
   var options = {
     url: url,

@@ -8,7 +8,7 @@ var moment = require("moment");
 var album = require("./getAlbum.js");
 var md5 = require('MD5');
 var config = require("../config.js");
-var asciify = require('asciify-string');
+var charmed = require('charmed');
 
 var S = require('string');
 S.extendPrototype();
@@ -26,13 +26,12 @@ function fetchMetadataForUrl(url, req, mainCallback) {
   }
 
   var track = null;
-  var fetchMethodCacheTime = 21600;
+  var fetchMethodCacheTime = Math.floor(Date.now() / 1000) + (config.cachetime * 60);
   var streamCacheKey = ("cache-stream-" + url).slugify();
 
   var sourceStreamCacheKey = ("cache-source-stream-" + url).slugify();
   var metadataSource;
   var streamFetchMethodCacheKey = ("cache-stream-fetchmethod" + url).slugify();
-  // global.memcacheClient = req.app.memcacheClient;
 
   if (url.endsWith("/;")) {
     url = url + "/;";
@@ -237,7 +236,7 @@ function populateTrackObjectWithArtist(track, apiData) {
 
       track.image.url = apiData.image.last()["#text"];
       track.isOnTour = parseInt(apiData.ontour);
-      track.bio.text = asciify(bioText);
+      track.bio.text = charmed.toSimple(bioText);
       track.bio.published = bioDate.year();
       track.tags = apiData.tags.tag.map(function(tagObject) {
         return tagObject.name;
@@ -253,7 +252,7 @@ function populateTrackObjectWithTrack(track, apiData) {
 
   if (apiData) {
     try {
-      track.album.name = asciify(apiData.album.title);
+      track.album.name = charmed.toSimple(apiData.album.title);
       track.album.image = apiData.album.image.last()["#text"];
       track.metaDataFetched = true;
     } catch (e) {
