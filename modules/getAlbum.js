@@ -69,7 +69,6 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
     }
 
   ], function(error, albums) {
-    // console.log("Total " + albums.length + " albums returned.");
     if (albums.length > 0) {
       async.filter(albums, function(singleAlbum, callback) {
         return callback((singleAlbum !== null && singleAlbum.image !== null) || (singleAlbum && singleAlbum.mbid !== null));
@@ -83,14 +82,17 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
 
         if (!album.image) {
           getAlbumArtForAlbum(album, function(error, finalAlbum) {
+            utils.cacheData(albumObjectCacheKey, finalAlbum, 0);
             return mainCallback(error, finalAlbum);
           });
         } else {
+          utils.cacheData(albumObjectCacheKey, album, 0);
           return mainCallback(error, album);
         }
 
       });
     } else {
+      utils.cacheData(albumObjectCacheKey, null, 0);
       return mainCallback(null, null);
     }
 
