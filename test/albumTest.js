@@ -28,11 +28,12 @@ tracks.push({
   track: "Believe",
   album: "Believe"
 });
+tracks.push({
+  artist: "Styx",
+  track: "Renegade",
+  album: "Pieces of Eight"
+});
 
-// var singleTrack = tracks[0];
-// album.fetchAlbumForArtistAndTrack(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-//   console.log(albumObject);
-// });
 
 async.each(tracks, function(singleTrack, callback) {
   describe("fetchAlbumForArtistAndTrack", function() {
