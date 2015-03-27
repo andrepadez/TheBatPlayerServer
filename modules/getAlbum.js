@@ -50,8 +50,8 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
         return callback(null, null);
       }
     },
-    //
-    // // // Try Last.FM
+
+    // Try Last.FM
     function(callback) {
       if (!album) {
         lastfm.getAlbum(artist, track, callback);
@@ -111,7 +111,7 @@ function getAlbumArtForAlbum(album, mainCallback) {
     function(callback) {
       if (album.mbid !== null && !album.image) {
 
-        discogs.getAlbumArtFromDiscogsWithMBID(album.mbid, function(error, result) {
+        discogs.getAlbumArtWithMBID(album.mbid, function(error, result) {
           if (!error && result) {
             album.image = result;
           }
@@ -150,8 +150,5 @@ function retrySanitized(artistName, trackName, callback) {
   }
 
 }
-
-
-
 
 module.exports.fetchAlbumForArtistAndTrack = fetchAlbumForArtistAndTrack;
