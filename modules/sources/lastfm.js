@@ -1,11 +1,26 @@
-var utils = require("../utils/utils.js");
-var config = require("../config.js");
+var utils = require("../../utils/utils.js");
+var config = require("../../config.js");
 var log = utils.log;
 
 var LastfmAPI = require('lastfmapi');
 var lastfm = new LastfmAPI({
   api_key: "62be1c8445c92c28e5b36f548c069f69"
 });
+
+function getAlbum(artistName, trackName, callback) {
+  albumUsingLastFM(artistName, trackName, function(error, albumResult) {
+    if (!error && albumResult) {
+      var releaseDate = null;
+      if (albumResult.releasedate) {
+        releaseDate = moment(new Date(albumResult.releasedate.trim())).year();
+      }
+      var albumObject = createAlbumObject(albumResult.name, albumResult.image.last()['#text'], releaseDate, albumResult.mbid);
+      return callback(error, albumObject);
+    } else {
+      return callback(error, null);
+    }
+  });
+}
 
 function albumUsingLastFM(artist, track, callback) {
   getTrackDetails(artist, track, function(error, trackObject) {
@@ -110,3 +125,4 @@ module.exports.getArtistDetails = getArtistDetails;
 module.exports.getTrackDetails = getTrackDetails;
 module.exports.getAlbumDetails = getAlbumDetails;
 module.exports.albumUsingLastFM = albumUsingLastFM;
+module.exports.getAlbum = getAlbum;
