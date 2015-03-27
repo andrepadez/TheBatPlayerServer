@@ -50,8 +50,8 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
         return callback(null, null);
       }
     },
-
-    // // Try Last.FM
+    //
+    // // // Try Last.FM
     function(callback) {
       if (!album) {
         lastfm.getAlbum(artist, track, callback);
@@ -124,7 +124,7 @@ function getAlbumArtForAlbum(album, mainCallback) {
 
   ], function(error, albums) {
     async.filter(albums, function(singleAlbum, callback) {
-      return callback(singleAlbum.image !== null);
+      return callback(album.image !== null);
     }, function(results) {
       var finalAlbum;
       if (results.length > 0) {

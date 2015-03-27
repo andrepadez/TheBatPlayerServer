@@ -7,6 +7,10 @@ chai.config.includeStack = false;
 var async = require("async");
 var album = require("../modules/getAlbum.js");
 
+var lastfm = require("../modules/sources/lastfm.js");
+var musicbrainz = require("../modules/sources/musicbrainz.js");
+var discogs = require("../modules/sources/discogs.js");
+
 var tracks = [];
 tracks.push({
   artist: "The Prodigy",
@@ -57,55 +61,56 @@ async.each(tracks, function(singleTrack, callback) {
   });
 });
 
-//   describe("getAlbumsFromDiscogs", function() {
-//     it("Should return an album from discogs for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
+
+// var singleTrack = tracks[0];
+// describe("discogs.getAlbum", function() {
+//   it("Should return an album from discogs for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
 //
-//       album.getAlbumFromDiscogs(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-//         console.log(albumObject);
-//         check(done, function() {
-//           expect(albumObject).to.exist;
-//           expect(albumObject).to.have.property('name');
-//           expect(albumObject).to.have.property('image');
-//           expect(albumObject).to.have.property('released');
-//           expect(albumObject).to.have.property('mbid');
-//           expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-//         });
+//     discogs.getAlbum(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//       console.log(albumObject);
+//       check(done, function() {
+//         expect(albumObject).to.exist;
+//         expect(albumObject).to.have.property('name');
+//         expect(albumObject).to.have.property('image');
+//         expect(albumObject).to.have.property('released');
+//         expect(albumObject).to.have.property('mbid');
+//         expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
 //       });
-//
 //     });
+//
 //   });
+// });
+// //
+// describe("musicbrainz.getAlbum", function() {
+//   it("Should return an album from musicbrainz for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
 //
-//   describe("getAlbumsFromMusicbrainz", function() {
-//     it("Should return an album from musicbrainz for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
-//
-//       album.getAlbumFromMusicbrainz(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-//         console.log(albumObject);
-//         check(done, function() {
-//           expect(albumObject).to.exist;
-//           expect(albumObject).to.have.property('name');
-//           expect(albumObject).to.have.property('image');
-//           expect(albumObject).to.have.property('released');
-//           expect(albumObject).to.have.property('mbid');
-//           expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-//         });
+//     musicbrainz.getAlbum(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//       console.log(albumObject);
+//       check(done, function() {
+//         expect(albumObject).to.exist;
+//         expect(albumObject).to.have.property('name');
+//         expect(albumObject).to.have.property('image');
+//         expect(albumObject).to.have.property('released');
+//         expect(albumObject).to.have.property('mbid');
+//         expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
 //       });
-//
 //     });
+//
 //   });
+// });
+// //
+// describe("albumFromLastFM", function() {
+//   it("Should return an album from LastFM for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
 //
-//   describe("albumFromLastFM", function() {
-//     it("Should return an album from LastFM for " + singleTrack.artist + " - " + singleTrack.track, function(done) {
-//
-//       album.albumFromLastFM(singleTrack.artist, singleTrack.track, function(error, albumObject) {
-//         console.log(albumObject);
-//         check(done, function() {
-//           expect(albumObject).to.exist;
-//           expect(albumObject).to.have.property('name');
-//           expect(albumObject).to.have.property('image');
-//           expect(albumObject).to.have.property('released');
-//           expect(albumObject).to.have.property('mbid');
-//           expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
-//         });
+//     lastfm.getAlbum(singleTrack.artist, singleTrack.track, function(error, albumObject) {
+//       console.log(albumObject);
+//       check(done, function() {
+//         expect(albumObject).to.exist;
+//         expect(albumObject).to.have.property('name');
+//         expect(albumObject).to.have.property('image');
+//         expect(albumObject).to.have.property('released');
+//         expect(albumObject).to.have.property('mbid');
+//         expect(albumObject.name.toLowerCase()).to.equal(singleTrack.album.toLowerCase());
 //       });
 //     });
 //   });
