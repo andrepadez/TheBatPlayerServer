@@ -83,6 +83,7 @@ function getAlbumDetails(artistName, albumName, mbid, callback) {
 
 function getTrackDetails(artistName, trackName, callback) {
   var cacheKey = ("cache-track-" + trackName + "-" + artistName).slugify();
+
   utils.getCacheData(cacheKey, function(error, result) {
     if (!error && result !== undefined) {
       return callback(error, result);

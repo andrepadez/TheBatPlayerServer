@@ -6,7 +6,11 @@ function createAlbumObject(title, imageUrl, releaseDate, mbid) {
     var albumObject = {};
     albumObject.name = title;
     albumObject.image = imageUrl;
-    albumObject.released = parseInt(releaseDate);
+    if (releaseDate) {
+      albumObject.released = parseInt(releaseDate);
+    } else {
+      albumObject.released = null;
+    }
     albumObject.mbid = mbid;
 
     return albumObject;

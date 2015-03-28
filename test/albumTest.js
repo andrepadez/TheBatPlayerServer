@@ -38,7 +38,6 @@ tracks.push({
   album: "Pieces of Eight"
 });
 
-
 async.each(tracks, function(singleTrack, callback) {
   describe("fetchAlbumForArtistAndTrack", function() {
 
