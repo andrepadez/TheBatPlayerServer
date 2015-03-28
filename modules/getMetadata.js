@@ -239,9 +239,15 @@ function populateTrackObjectWithArtist(track, apiData) {
       track.tags = apiData.tags.tag.map(function(tagObject) {
         return tagObject.name;
       });
+
+      // If on tour then add it as the first tag
+      if (track.isOnTour) {
+        track.tags.unshift("On Tour");
+      }
+
       track.metaDataFetched = true;
     } catch (e) {
-
+      log(e);
     }
   }
 }
