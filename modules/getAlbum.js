@@ -72,7 +72,6 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
         if (!album.image) {
           getAlbumArtForAlbum(album, function(error, finalAlbum) {
             utils.cacheData(albumObjectCacheKey, finalAlbum, 0);
-            console.log(album);
             return mainCallback(error, finalAlbum);
           });
         } else {
@@ -84,7 +83,6 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
         // No album found
         var isRetrying = retrySanitized(artist, track, mainCallback);
         if (!isRetrying) {
-          console.log("Album not found!");
           utils.cacheData(albumObjectCacheKey, null, 0);
           return mainCallback(null, null);
         }
