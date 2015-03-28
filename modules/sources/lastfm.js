@@ -1,6 +1,8 @@
 var utils = require("../../utils/utils.js");
 var config = require("../../config.js");
 var log = utils.log;
+var albumSorting = require("../albumSorting.js");
+var moment = require("moment");
 
 var LastfmAPI = require('lastfmapi');
 var lastfm = new LastfmAPI({
@@ -14,7 +16,7 @@ function getAlbum(artistName, trackName, callback) {
       if (albumResult.releasedate) {
         releaseDate = moment(new Date(albumResult.releasedate.trim())).year();
       }
-      var albumObject = createAlbumObject(albumResult.name, albumResult.image.last()['#text'], releaseDate, albumResult.mbid);
+      var albumObject = albumSorting.createAlbumObject(albumResult.name, albumResult.image.last()['#text'], releaseDate, albumResult.mbid);
       return callback(error, albumObject);
     } else {
       return callback(error, null);

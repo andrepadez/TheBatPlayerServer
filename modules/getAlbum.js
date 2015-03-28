@@ -25,7 +25,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
       utils.getCacheData(albumObjectCacheKey, function(error, albumObject) {
         if (!error && albumObject !== undefined && config.enableCache) {
           album = albumObject;
-          return callback(null, albumObject);
+          return mainCallback(null, albumObject);
         } else {
           return callback(null, null);
         }
@@ -83,7 +83,7 @@ function fetchAlbumForArtistAndTrack(artist, track, mainCallback) {
         // No album found
         var isRetrying = retrySanitized(artist, track, mainCallback);
         if (!isRetrying) {
-          utils.cacheData(albumObjectCacheKey, null, 0);
+          utils.cacheData(albumObjectCacheKey, null, 60);
           return mainCallback(null, null);
         }
       }

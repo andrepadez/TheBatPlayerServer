@@ -180,8 +180,6 @@ function fetchMetadataForUrl(url, req, mainCallback) {
           return mainCallback(error, null);
         }
 
-        expires = Math.round(new Date().getTime() / 1000) + config.cachetime;
-        track.expires = expires;
         utils.cacheData(streamCacheKey, track, config.cachetime);
 
         return mainCallback(null, track);
