@@ -246,7 +246,7 @@ function populateTrackObjectWithArtist(track, apiData) {
 
       // If on tour then add it as the first tag
       if (track.isOnTour) {
-        track.tags.unshift("On Tour");
+        track.tags.unshift("on tour");
       }
 
       track.metaDataFetched = true;
