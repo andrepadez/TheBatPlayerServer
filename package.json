@@ -41,6 +41,6 @@
   "devDependencies": {
     "mocha-clean": "^0.4.0",
     "asciify-string": "^0.1.1",
-    "charmed": "^0.2.8
+    "charmed": "^0.2.8"
   }
 }
