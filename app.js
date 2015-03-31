@@ -1,3 +1,4 @@
+var config = require("./config.js");
 var env = process.env.NODE_ENV;
 
 if (env === "production") {
@@ -28,9 +29,10 @@ setupMemcache();
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
+app.use(timeout('10s'));
+
 app.use(compress());
 app.set('view engine', 'jade');
-app.use(timeout('10s'));
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -69,25 +71,42 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
+// if (app.get('env') === 'development') {
+//   app.use(function(err, req, res, next) {
+//     res.status(err.status || 500);
+//     res.render('error', {
+//       message: err.message,
+//       error: err
+//     });
+//   });
+// }
 
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
+
+  if (req.timedout) {
+    handleTimeout(err, req, res);
+    return;
+  }
+
   res.render('error', {
     message: err.message,
     error: {}
   });
 });
 
+function handleTimeout(err, req, res) {
+  res.status(200);
 
+  var error = {};
+  error.message = "This request has timed out.";
+  error.status = 503;
+  error.batserver = config.useragent;
+
+  res.json({
+    error: error
+  });
+}
 module.exports = app;
