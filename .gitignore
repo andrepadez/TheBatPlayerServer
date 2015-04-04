@@ -15,3 +15,4 @@ test/tmp
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 colorTest.html
+config.js

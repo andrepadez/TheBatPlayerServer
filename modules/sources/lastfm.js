@@ -6,7 +6,7 @@ var moment = require("moment");
 
 var LastfmAPI = require('lastfmapi');
 var lastfm = new LastfmAPI({
-  api_key: "62be1c8445c92c28e5b36f548c069f69"
+  api_key: config.lastfmKey
 });
 
 function getAlbum(artistName, trackName, callback) {
