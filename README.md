@@ -49,4 +49,4 @@ A NodeJS server-side application for providing metadata from a streaming interne
 4. Write a client on top of this service and let me know how it's working for you.
 5. Check out [The Bat Player](https://github.com/gabek/TheBatPlayerRoku).
 
-[![Video](http://i.imgur.com/YdxZM5d.gifv)](https://vimeo.com/112659447)
+[![Video](http://imgur.com/download/YdxZM5d)](https://vimeo.com/112659447)
