@@ -6,7 +6,7 @@ var log = utils.log;
 
 function createHeader(text, width, callback) {
 
-  var path = utils.getCacheFilepathForUrl(text, "header");
+  var path = utils.getCacheFilepathForUrl(text, "header") + "-" + width;
 
   fs.exists(path, function(exists) {
     if (exists && config.enableImageCache) {
